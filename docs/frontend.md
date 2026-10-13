@@ -28,5 +28,6 @@ or the selected media changes.
 Documentary originals, local prototypes and private provenance stay outside
 the public file list. Prepared video files contain no audio. The vertical
 workshop derivative retains its sequence, with visible personal plates masked
-in three shots. Contact details remain placeholders, and the consultation is
-a local preview/copy flow. Repository delivery does not deploy the website.
+in three shots. Contact details include the workshop location, opening hours
+and a direct WhatsApp link. The consultation remains a local preview/copy
+flow. Repository delivery does not deploy the website.
