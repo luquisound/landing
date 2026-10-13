@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111110">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Insonorización, audio y personalización en Luquisound.">
+  <title>Servicios — Luquisound</title>
+  <link rel="icon" href="assets/monogram.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="services.css">
+  <script src="cases.js" defer></script>
+  <script src="services.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body class="inner-page">
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+
+  <main class="page-shell" id="contenido">
+    <header class="page-heading">
+      <h1>Servicios<span class="yellow-dot">.</span></h1>
+    </header>
+
+    <div class="work-grid">
+      <a class="work-card" href="assets/soundproofing.jpg" data-open-service="insonorizacion" aria-haspopup="dialog" aria-label="Ver detalle de Insonorización" aria-controls="service-dialog">
+        <span class="work-image"><img src="assets/soundproofing.jpg" alt="Detalle de una puerta con material de insonorización" width="1013" height="1800" fetchpriority="high"></span>
+        <span class="work-caption"><span class="work-name">Insonorización</span><span class="work-open">Ver detalle <span aria-hidden="true">↗</span></span></span>
+      </a>
+      <a class="work-card" href="assets/audio-detail.jpg" data-open-service="audio" aria-haspopup="dialog" aria-label="Ver detalle de Audio" aria-controls="service-dialog">
+        <span class="work-image"><img src="assets/audio-detail.jpg" alt="Detalle del montaje de componentes de audio" width="1800" height="1599" loading="lazy"></span>
+        <span class="work-caption"><span class="work-name">Audio</span><span class="work-open">Ver detalle <span aria-hidden="true">↗</span></span></span>
+      </a>
+      <a class="work-card" href="assets/stars.jpg" data-open-service="personalizacion" aria-haspopup="dialog" aria-label="Ver detalle de Personalización" aria-controls="service-dialog">
+        <span class="work-image"><img src="assets/stars.jpg" alt="Interior de un vehículo con iluminación de cielo estrellado" width="1200" height="1800" loading="lazy"></span>
+        <span class="work-caption"><span class="work-name">Personalización</span><span class="work-open">Ver detalle <span aria-hidden="true">↗</span></span></span>
+      </a>
+    </div>
+  </main>
+
+  <nav class="floating-nav" aria-label="Navegación principal">
+    <a href="index.html">Inicio</a>
+    <a class="nav-current" href="servicios.html" aria-current="page">Servicios</a>
+    <a href="trabajos.html">Trabajos</a>
+    <a class="nav-consult" href="contacto.html">Contacto <span aria-hidden="true">↗</span></a>
+  </nav>
+
+  <dialog class="gallery-dialog" id="service-dialog" aria-labelledby="service-dialog-title" aria-describedby="service-dialog-description">
+    <div class="dialog-header"><span class="eyebrow">Luquisound / Servicios</span><button class="dialog-close" type="button" data-close-dialog>Cerrar <span aria-hidden="true">×</span></button></div>
+    <div class="gallery-body">
+      <div class="service-introduction">
+        <h2 id="service-dialog-title">Insonorización</h2>
+        <p id="service-dialog-description">Tratamiento de puertas y preparación del montaje de los parlantes, cuidando los materiales y la terminación del interior.</p>
+      </div>
+      <div class="gallery-image-wrap service-media">
+        <img id="service-dialog-image" src="assets/soundproofing.jpg" alt="Detalle de una puerta con material de insonorización" width="1013" height="1800">
+        <figure id="service-dialog-evidence" hidden>
+          <video id="service-dialog-video" controls playsinline muted preload="none" aria-describedby="service-dialog-caption"></video>
+          <figcaption id="service-dialog-caption"></figcaption>
+        </figure>
+        <div class="service-clip-picker" id="service-dialog-clips" aria-label="Elegir un trabajo para ver" hidden></div>
+      </div>
+      <div class="gallery-information">
+        <p id="service-dialog-examples" hidden></p>
+        <ul class="service-topics" id="service-dialog-topics"></ul>
+        <section class="service-related" id="service-dialog-related" hidden>
+          <h3>Trabajos relacionados</h3>
+          <ul id="service-dialog-work-links"></ul>
+          <a class="text-link" id="service-dialog-all-work" href="trabajos.html?categoria=insonorizacion">Ver todos los trabajos <span aria-hidden="true">↗</span></a>
+        </section>
+        <a class="service-dialog-cta button button-yellow" id="service-dialog-cta" href="contacto.html?interes=Insonorizaci%C3%B3n">Consultar <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

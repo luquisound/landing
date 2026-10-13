@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111110">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Luquisound. Audio, insonorización y personalización para tu auto.">
+  <title>Luquisound — Audio & personalización</title>
+  <link rel="icon" href="assets/monogram.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+  <noscript><style>.hero-media video { display: none; }</style></noscript>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;pointer-events:none"><defs><filter id="monogram-transparency" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1 1 1 0 0"/></filter></defs></svg>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <header class="site-header" id="site-header">
+    <a class="header-brand" href="index.html" aria-label="Luquisound, inicio">
+      <img src="assets/monogram.jpg" alt="Luquisound" width="512" height="292" style="filter:url(#monogram-transparency)">
+    </a>
+    <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" hidden>Menú <span aria-hidden="true">+</span></button>
+    <nav class="navigation" id="navigation" aria-label="Navegación principal">
+      <a href="index.html" aria-current="page">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="trabajos.html">Trabajos</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+      <div class="hero-media" aria-hidden="true">
+        <picture>
+          <source media="(min-width: 1000px)" srcset="assets/hero-desktop-poster.jpg">
+          <img class="hero-poster" src="assets/workshop.jpg" alt="" width="1800" height="1013" fetchpriority="high">
+        </picture>
+        <video id="hero-video" muted autoplay loop playsinline preload="none" poster="assets/workshop.jpg" tabindex="-1" data-mobile-source="assets/workshop-mobile.mp4" data-desktop-source="assets/hero-desktop.mp4" data-desktop-poster="assets/hero-desktop-poster.jpg" data-mobile-poster="assets/workshop.jpg"></video>
+      </div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow hero-eyebrow">Audio / Insonorización / Personalización</p>
+        <h1 class="hero-title" id="hero-title"><span class="sr-only">Luquisound</span><img src="assets/logo.png" alt="" width="1870" height="212" fetchpriority="high"></h1>
+        <a class="button button-yellow hero-cta" href="contacto.html">Hablemos de tu auto <span aria-hidden="true">↗</span></a>
+      </div>
+      <button class="hero-video-toggle" id="hero-video-toggle" type="button" aria-controls="hero-video" aria-pressed="false" hidden>Pausar video</button>
+    </section>
+  </main>
+</body>
+</html>

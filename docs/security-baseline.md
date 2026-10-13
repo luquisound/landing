@@ -2,9 +2,9 @@
 
 ## Publication boundary
 
-The bootstrap intentionally publishes only the exact infrastructure paths in `public-files.json`. Existing local prototypes, the local preview server, photographs, videos and provenance documents are ignored. The documentary library remains outside Git; its location is stored only in ignored `docs/project-context.local.md`.
+The exact paths in `public-files.json` define the repository publication boundary. Infrastructure and the selected website files in `site/` are included individually. Documentary originals, local prototypes, the private preview server and provenance documents remain ignored. The documentary library remains outside Git; its location is stored only in ignored `docs/project-context.local.md`.
 
-Media clearance is pending. Before adding landing content, obtain approval for every selected asset, client/vehicle identity, visible plate, audio track and business claim. Review metadata and prepare public copies with appropriate sanitization. Keep the private provenance document in local/private storage; prepare a public-safe credit or permission record only when appropriate. Updating the manifest or ignore rules is a publication decision.
+The selected website integration was authorized for `main`. New assets, client/vehicle identities, visible plates, audio tracks and business claims still require explicit approval. Review metadata and prepare public copies with appropriate sanitization. The selected video derivatives are silent, and the complete vertical workshop derivative masks personal plates in three shots. Keep private provenance in local/private storage. Updating the manifest or ignore rules remains a publication decision; repository delivery does not authorize a deployment.
 
 No secrets are needed for the initial CI. Browser code must never contain private credentials; environment variable prefixes or obscured strings do not make browser-delivered secrets private. Avoid uploading CI artifacts containing private files. The guard detects a limited set of common credential patterns and does not validate arbitrary secrets or media rights. Treat every Git object, commit author, issue, PR and log as potentially public.
 

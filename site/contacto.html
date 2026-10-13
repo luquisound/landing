@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111110">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Hablemos de tu auto y de lo que querés mejorar.">
+  <title>Contacto — Luquisound</title>
+  <link rel="icon" href="assets/monogram.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body class="inner-page">
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+
+  <main class="page-shell" id="contenido">
+    <header class="page-heading">
+      <h1>Hablemos<span class="yellow-dot">.</span></h1>
+    </header>
+    <div class="contact-layout">
+      <dl class="contact-details">
+        <div><dt>WhatsApp</dt><dd>[WhatsApp]</dd></div>
+        <div><dt>Instagram</dt><dd><a href="https://www.instagram.com/luquisound.ok/" target="_blank" rel="noopener noreferrer">@luquisound.ok <span aria-hidden="true">↗</span></a></dd></div>
+        <div><dt>Taller</dt><dd>[Dirección]</dd></div>
+        <div><dt>Días y horarios</dt><dd>[Días y horarios]</dd></div>
+      </dl>
+      <div class="contact-action">
+        <button class="button button-yellow" type="button" data-open-contact data-app-only hidden aria-haspopup="dialog">Contanos tu idea <span aria-hidden="true">↗</span></button>
+        <noscript><p class="form-note">La consulta interactiva requiere JavaScript.</p></noscript>
+      </div>
+    </div>
+  </main>
+
+  <nav class="floating-nav" aria-label="Navegación principal">
+    <a href="index.html">Inicio</a>
+    <a href="servicios.html">Servicios</a>
+    <a href="trabajos.html">Trabajos</a>
+    <a class="nav-current nav-consult" href="contacto.html" aria-current="page">Contacto <span aria-hidden="true">↗</span></a>
+  </nav>
+
+  <dialog class="contact-dialog" id="contact-dialog" aria-labelledby="consultation-title">
+    <div class="dialog-header"><span class="eyebrow">Luquisound / Hablemos</span><button class="dialog-close" type="button" data-close-dialog>Cerrar <span aria-hidden="true">×</span></button></div>
+    <h2 id="consultation-title">Tu auto.<br>Tu idea<span class="yellow-dot">.</span></h2>
+    <form id="consultation-form">
+      <label for="vehicle">¿Qué auto tenés?</label>
+      <input id="vehicle" name="vehicle" type="text" placeholder="Marca, modelo y año" maxlength="100" autocomplete="off" required>
+      <label for="interest">¿Qué te interesa?</label>
+      <select id="interest" name="interest"><option value="Audio">Audio</option><option value="Insonorización">Insonorización</option><option value="Personalización">Personalización</option><option value="Asesoramiento">Todavía no lo sé</option></select>
+      <label for="idea">Contanos tu idea</label>
+      <textarea id="idea" name="idea" placeholder="Qué te gustaría mejorar" rows="3" maxlength="600" required></textarea>
+      <button class="button button-yellow" type="submit">Ver mi consulta <span aria-hidden="true">↗</span></button>
+      <p class="form-note">Vista previa. No se envía ningún mensaje.</p>
+    </form>
+    <section class="consultation-preview" id="consultation-preview" aria-labelledby="preview-title" hidden>
+      <h3 id="preview-title">Así quedaría tu mensaje</h3>
+      <textarea id="preview-message" aria-label="Vista previa del mensaje" readonly rows="6"></textarea>
+      <div class="preview-actions"><button class="button button-yellow" id="copy-consultation" type="button">Copiar mensaje</button><button class="text-link" id="edit-consultation" type="button">Editar</button></div>
+      <p class="form-note" id="copy-status" role="status">Tu consulta está lista para revisar. No se envió ningún mensaje.</p>
+    </section>
+  </dialog>
+</body>
+</html>
