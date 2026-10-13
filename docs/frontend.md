@@ -7,8 +7,8 @@ runtime dependencies are required.
 
 The home selects one video for the current viewport: a 25-second horizontal
 montage from 1000 px, or the complete vertical workshop sequence below that
-width. Both are silent. A pause control, static posters, reduced-motion
-handling and hidden-document pausing are provided.
+width. Both are silent and play without playback controls. Static posters,
+reduced-motion handling and hidden-document pausing are provided.
 
 Services retain three pillars and link to related work. Work contains eight
 case collections, ten manually played clips and nine existing photographs.
@@ -20,7 +20,7 @@ or the selected media changes.
 
 - Run `npm run verify` and `git diff --check` before a commit.
 - Check mobile, tablet, desktop and ultrawide home framing, source selection,
-  pause/resume, reduced motion and poster fallback.
+  reduced motion and poster fallback.
 - Check service links, case filters, direct case URLs, browser history,
   keyboard navigation, manual playback and media release.
 - Check that only selected website files and prepared media enter the index.

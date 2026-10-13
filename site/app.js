@@ -14,8 +14,6 @@ const previewMessage = document.getElementById("preview-message");
 const copyStatus = document.getElementById("copy-status");
 const desktopNavigation = window.matchMedia("(min-width: 1000px)");
 const dialogOpeners = new WeakMap();
-const heroVideoToggle = document.getElementById("hero-video-toggle");
-let heroPausedByUser = false;
 let heroSource = "";
 let heroLoadFailed = false;
 
@@ -99,12 +97,7 @@ function applyMotionPreference() {
     heroLoadFailed = false;
   }
   hero.classList.toggle("hero-video-reduced", reducedMotion.matches || heroLoadFailed);
-  if (heroVideoToggle) {
-    heroVideoToggle.hidden = reducedMotion.matches || heroLoadFailed;
-    heroVideoToggle.textContent = heroPausedByUser ? "Reproducir video" : "Pausar video";
-    heroVideoToggle.setAttribute("aria-pressed", String(heroPausedByUser));
-  }
-  if (reducedMotion.matches || document.hidden || heroPausedByUser || heroLoadFailed) {
+  if (reducedMotion.matches || document.hidden || heroLoadFailed) {
     video.pause();
     return;
   }
@@ -128,10 +121,6 @@ if (video) {
   reducedMotion.addEventListener("change", applyMotionPreference);
   desktopNavigation.addEventListener("change", applyMotionPreference);
   document.addEventListener("visibilitychange", applyMotionPreference);
-  heroVideoToggle?.addEventListener("click", () => {
-    heroPausedByUser = !heroPausedByUser;
-    applyMotionPreference();
-  });
   applyMotionPreference();
 }
 
