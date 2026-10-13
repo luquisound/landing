@@ -85,7 +85,7 @@ strong, b { font-weight: 400; }
 .hero-shade { background: linear-gradient(180deg, rgb(17 17 16 / .62), rgb(17 17 16 / .22) 30%, rgb(17 17 16 / .49) 65%, var(--black)), linear-gradient(90deg, rgb(17 17 16 / .15), rgb(17 17 16 / .2)); }
 .hero-shade::after { content: ""; position: absolute; inset: 0; opacity: .1; background: repeating-linear-gradient(0deg, transparent, transparent 3px, #000 3px, #000 4px); pointer-events: none; }
 .hero-content { width: 100%; text-align: center; }
-.hero-eyebrow { max-width: 300px; margin: 0 auto 30px; color: var(--white); line-height: 1.9; font-size: .75rem; }
+.hero-eyebrow { margin: 0 auto 30px; color: var(--white); line-height: 1.9; font-size: clamp(.625rem, 3.25vw, .75rem); white-space: nowrap; }
 .hero-title { width: 100%; margin-inline: auto; }
 .hero-title img { width: 100%; height: auto; filter: drop-shadow(0 4px 25px rgb(0 0 0 / .3)); }
 .hero-cta { margin-top: 30px; }
@@ -150,7 +150,6 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 @media (hover: hover) { .work-card:hover .work-image img { transform: scale(1.025); } }
 @media (min-width: 700px) {
   .hero-title { max-width: 1000px; }
-  .hero-eyebrow { max-width: none; }
   .work-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .contact-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center; }
   .contact-action { margin-top: 0; }
