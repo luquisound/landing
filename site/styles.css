@@ -145,6 +145,8 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 }
 @media (min-width: 700px) and (max-width: 999px) { .work-caption { flex-direction: column; align-items: flex-start; gap: 8px; } }
 @media (min-width: 1000px) {
+  .contact-action { display: flex; justify-content: center; }
+  .contact-action > .button { width: min(100%, 288px); min-height: 72px; padding-inline: var(--space-4); font-size: 1.125rem; }
   .site-header { padding-block: 23px; }
   .menu-toggle { display: none; }
   .js .navigation, .navigation { display: flex; width: auto; flex-wrap: nowrap; gap: var(--space-4); }
