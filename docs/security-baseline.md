@@ -23,11 +23,11 @@ No secrets are needed for the initial CI. Browser code must never contain privat
 
 Initial inspection on 2026-10-12 confirmed a public, empty remote. The contributor session (`materamos`) had write access; the owner session (`luquisound`) was subsequently authenticated and verified with administrator access. Owner access is used only for repository configuration. Commits and pushes use `materamos`, with its GitHub no-reply author address.
 
-The owner session configured and read back secret scanning and push protection, private vulnerability reporting, Dependabot security updates, restricted Actions with required SHA pins, read-only workflow defaults, approval for every external fork contributor and 14-day log/artifact retention. Main protection is activated after the initial contributor push and successful checks, following the sequence below. This document describes the baseline; inspect GitHub for its current live state.
+The owner session configured and read back secret scanning and push protection, private vulnerability reporting, Dependabot security updates, restricted Actions with required SHA pins, read-only workflow defaults, approval for every external fork contributor and 14-day log/artifact retention. The current development workflow permits direct pushes to `main`, without mandatory pull requests or owner approval. Main protection blocks force pushes and deletion and preserves linear history. CI and CodeQL run after a push; their results do not gate the push. This document describes the baseline; inspect GitHub for its current live state.
 
 An administrator must apply and read back each control below. JSON payloads are reviewable REST API request bodies, not a workflow that automatically changes permissions. Use the authenticated GitHub CLI without copying tokens into files or this repository.
 
-1. Review and publish the initial infrastructure after explicit commit/push authorization. Review the commit author email; use GitHub's verified no-reply address if personal email should remain private. Wait for successful CI and CodeQL runs before enabling required checks.
+1. Review changes and run local verification before authorized commits/pushes directly to `main`. Review the commit author email; use GitHub's verified no-reply address if personal email should remain private. Inspect CI and CodeQL results after each push and address failures.
 2. Apply repository merge settings and secret scanning/push protection:
 
    ```sh
@@ -54,15 +54,15 @@ An administrator must apply and read back each control below. JSON payloads are 
 
    Confirm account/organization policy permits these settings; do not broaden action access to work around a policy failure.
 
-4. After `public-boundary`, `tests` and `CodeQL JavaScript` have completed on GitHub and CodeQL has no open high/critical findings, inspect `main-ruleset.json` and create the ruleset:
+4. Inspect `main-ruleset.json` and create the ruleset, or update the existing ruleset using its ID:
 
    ```sh
    gh api --method POST repos/luquisound/landing/rulesets --input docs/github-settings/main-ruleset.json
    ```
 
-   This requires PRs, an independent approval, owner review, resolved discussions and passing up-to-date CI/CodeQL; blocks force pushes and branch deletion; and has no bypass actors. It also requires CodeQL results and blocks high/critical security findings and analysis errors. The owner cannot approve their own PR. If the owner is the sole active contributor, decide an appropriate review workflow before activating; do not silently weaken it. The check integration ID is GitHub Actions (15368); confirm actual check names and application IDs from the first run. Fork contribution behavior must be verified when accepting the first external PR; never grant write tokens or secrets to make it pass.
+   This blocks force pushes and branch deletion, requires linear history and has no bypass actors. It does not require PRs, reviews, status checks or pre-existing CodeQL results. These gates would prevent routine direct pushes before the new commit could be analyzed. Secret scanning push protection remains enabled independently. CODEOWNERS provides optional reviewer guidance rather than a required approval.
 
-5. Read back repository `security_and_analysis`, Actions policies, workflow defaults, private reporting status and the created ruleset. Confirm both required checks are present and public reporting uses a private channel. Test a PR and verify direct pushes/force pushes are blocked. Do not claim these protections are active based solely on JSON files, CODEOWNERS or a workflow definition.
+5. Read back repository `security_and_analysis`, Actions policies, workflow defaults, private reporting status and the ruleset. Verify an authorized direct push to `main` succeeds and CI/CodeQL run on its commit. Confirm force-push and deletion rules remain active. Do not claim these protections are active based solely on JSON files, CODEOWNERS or a workflow definition.
 
 These admin controls need the repository owner's session or an appropriately scoped admin credential. Do not request or paste credentials into chat. GitHub may reject a payload due to account/organization policy; resolve the specific rejection with the owner rather than disabling controls.
 

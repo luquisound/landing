@@ -9,4 +9,7 @@
 - Run `npm run verify` and `git diff --check` before handing off changes.
 - GitHub Actions must use full commit SHA pins, minimum token permissions, GitHub-hosted runners and bounded timeouts. Do not use `pull_request_target` to execute contribution code.
 - Review `.github/` changes carefully; branch protection must be enforced remotely by an administrator.
+- Work directly on `main`. Do not create development branches or require pull requests or owner approvals unless the user changes this workflow.
+- Use `materamos` for commits and pushes, with its GitHub no-reply author address. Use the owner session only for repository configuration.
+- Run local verification before a push and inspect CI/CodeQL afterward; remote checks do not block direct pushes.
 - Deployments, public media publication, Git commits and pushes require explicit user authorization. Preserve unrelated local work.

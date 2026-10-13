@@ -8,7 +8,7 @@ npm run verify
 git diff --check
 ```
 
-Submit focused pull requests. Review all added files, generated output and workflow edits. `public-files.json` is the exact list of files approved for the initial public infrastructure. Additions require a publication review and matching ignore-rule changes. Passing the guard is not proof that media permissions or business claims are approved.
+Keep changes focused. The current development workflow uses direct commits and pushes to `main`, without mandatory pull requests or owner approval. Run local verification before pushing and inspect CI/CodeQL afterward. Review all added files, generated output and workflow edits. `public-files.json` is the exact list of files approved for the initial public infrastructure. Additions require a publication review and matching ignore-rule changes. Passing the guard is not proof that media permissions or business claims are approved.
 
 Never include environment files, credentials, local document paths, client information, private media or private provenance in code, issues, PR bodies or CI logs. Use synthetic examples in tests. Report vulnerabilities through the private channel described in `SECURITY.md`.
 
