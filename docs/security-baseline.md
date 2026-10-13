@@ -54,13 +54,13 @@ An administrator must apply and read back each control below. JSON payloads are 
 
    Confirm account/organization policy permits these settings; do not broaden action access to work around a policy failure.
 
-4. After `public-boundary` and `tests` have completed on GitHub, inspect `main-ruleset.json` and create the ruleset:
+4. After `public-boundary`, `tests` and `CodeQL JavaScript` have completed on GitHub and CodeQL has no open high/critical findings, inspect `main-ruleset.json` and create the ruleset:
 
    ```sh
    gh api --method POST repos/luquisound/landing/rulesets --input docs/github-settings/main-ruleset.json
    ```
 
-   This requires PRs, an independent approval, owner review, resolved discussions and passing up-to-date CI; blocks force pushes and branch deletion; and has no bypass actors. The owner cannot approve their own PR. If the owner is the sole active contributor, decide an appropriate review workflow before activating; do not silently weaken it. The check integration ID is GitHub Actions (15368); confirm actual check names and application IDs from the first run. Add CodeQL as a required check only after verifying its run name and fork behavior.
+   This requires PRs, an independent approval, owner review, resolved discussions and passing up-to-date CI/CodeQL; blocks force pushes and branch deletion; and has no bypass actors. It also requires CodeQL results and blocks high/critical security findings and analysis errors. The owner cannot approve their own PR. If the owner is the sole active contributor, decide an appropriate review workflow before activating; do not silently weaken it. The check integration ID is GitHub Actions (15368); confirm actual check names and application IDs from the first run. Fork contribution behavior must be verified when accepting the first external PR; never grant write tokens or secrets to make it pass.
 
 5. Read back repository `security_and_analysis`, Actions policies, workflow defaults, private reporting status and the created ruleset. Confirm both required checks are present and public reporting uses a private channel. Test a PR and verify direct pushes/force pushes are blocked. Do not claim these protections are active based solely on JSON files, CODEOWNERS or a workflow definition.
 

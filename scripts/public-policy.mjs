@@ -1,4 +1,6 @@
 import path from 'node:path';
+import { constants } from 'node:fs';
+import { open, realpath } from 'node:fs/promises';
 
 const textExtensions = new Set(['.md', '.mjs', '.json', '.yml']);
 const rootFiles = new Set(['.gitignore', '.gitattributes', '.editorconfig', '.github/CODEOWNERS']);
@@ -12,6 +14,24 @@ const credentialPatterns = [
   ['Windows local path', /\b[A-Za-z]:[\\/][A-Za-z0-9]/],
   ['Unix home path', /\/(?:Users|home)\/[A-Za-z0-9._-]+\//],
 ];
+
+export async function readPublicFile(target) {
+  // O_NOFOLLOW is unavailable on Windows; realpath still rejects redirected paths.
+  const handle = await open(target, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0));
+  try {
+    const info = await handle.stat();
+    if (!info.isFile()) throw new Error('must be a regular file');
+    if (info.size > 256 * 1024) throw new Error('file exceeds infrastructure size limit');
+    const resolved = await realpath(target);
+    if (resolved.toLowerCase() !== target.toLowerCase()) throw new Error('linked paths are prohibited');
+    // Check and read the same descriptor, even if another process replaces the path.
+    const bytes = await handle.readFile();
+    if (bytes.length > 256 * 1024) throw new Error('file exceeds infrastructure size limit');
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } finally {
+    await handle.close();
+  }
+}
 
 export function pathIssues(file) {
   const parts = file.split('/');

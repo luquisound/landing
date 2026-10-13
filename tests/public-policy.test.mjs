@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { contentIssues, manifestIssues, pathIssues } from '../scripts/public-policy.mjs';
+import { mkdtemp, rmdir, symlink, unlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { contentIssues, manifestIssues, pathIssues, readPublicFile } from '../scripts/public-policy.mjs';
 
 test('rejects private, generated, noncanonical and media paths even if added to a manifest', () => {
   for (const file of ['.env', '.env.example', 'docs/project-context.local.md', 'assets/PROVENANCE.md',
@@ -44,4 +47,44 @@ test('rejects invalid, duplicate and self-omitting manifests', () => {
     assert.ok(manifestIssues(files).length > 0);
   }
   assert.deepEqual(manifestIssues(['public-files.json', 'README.md']), []);
+});
+
+test('file reader accepts UTF-8 and rejects oversized files, invalid UTF-8 and directories', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'luquisound-policy-'));
+  const target = path.join(directory, 'fixture.md');
+  try {
+    await writeFile(target, 'Public fixture\n');
+    assert.equal(await readPublicFile(target), 'Public fixture\n');
+    await writeFile(target, Buffer.alloc(256 * 1024 + 1));
+    await assert.rejects(readPublicFile(target), /size limit/);
+    await writeFile(target, Buffer.from([0xff]));
+    await assert.rejects(readPublicFile(target));
+    await assert.rejects(readPublicFile(directory));
+  } finally {
+    await unlink(target);
+    await rmdir(directory);
+  }
+});
+
+test('file reader rejects symlink targets when the OS permits symlink creation', async (context) => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'luquisound-policy-'));
+  const target = path.join(directory, 'fixture.md');
+  const link = path.join(directory, 'link.md');
+  let linked = false;
+  try {
+    await writeFile(target, 'Public fixture\n');
+    try {
+      await symlink(target, link, 'file');
+      linked = true;
+    } catch (error) {
+      if (error.code !== 'EPERM') throw error;
+      context.skip('OS denied symlink creation');
+      return;
+    }
+    await assert.rejects(readPublicFile(link));
+  } finally {
+    if (linked) await unlink(link);
+    await unlink(target);
+    await rmdir(directory);
+  }
 });
