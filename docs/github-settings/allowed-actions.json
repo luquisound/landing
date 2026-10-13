@@ -1,0 +1,9 @@
+{
+  "github_owned_allowed": false,
+  "verified_allowed": false,
+  "patterns_allowed": [
+    "actions/checkout@*",
+    "actions/setup-node@*",
+    "github/codeql-action/*@*"
+  ]
+}
