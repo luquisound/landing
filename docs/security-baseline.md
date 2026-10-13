@@ -17,7 +17,7 @@ No secrets are needed for the initial CI. Browser code must never contain privat
 - CI on pushes to `main` and PRs, with read-only tokens, no persisted checkout credentials, SHA-pinned actions, GitHub-hosted runners and job timeouts.
 - CodeQL with `security-extended` queries and the narrowly scoped permission needed to upload security results. GitHub treats fork PR uploads specially; no repository secrets are passed.
 - Weekly Dependabot updates for Actions, CODEOWNERS, contribution guidance and a security reporting policy.
-- The local preview server now permits only the two existing preview pages, their scripts/styles and media, and rejects redirected filesystem paths. Configuration and private provenance are not served. It remains a development-only tool and does not define production security headers or a deployment bundle.
+- The local preview server permits only the selected landing pages, their scripts/styles and media, and rejects redirected filesystem paths. Configuration and private provenance are not served. It remains a development-only tool and does not define production security headers or a deployment bundle.
 
 ## Administrator setup
 
