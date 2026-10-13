@@ -39,8 +39,16 @@ test('preview serves only approved site files with working media ranges', async 
     ['site/assets/PROVENANCE.md', 'private provenance'],
     ['private/secret.txt', 'private secret'],
     ['private/index.html', 'private index'],
+    ['site/assets/logo.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><path d="M0 0L1 1Z"/></svg>'],
+    ['site/assets/barlow-regular.woff2', Buffer.from('font-bytes')],
+    ['site/assets/barlow-license.txt', 'SIL OPEN FONT LICENSE Version 1.1\n'],
+    ['site/assets/unreviewed.svg', '<svg/>'],
+    ['site/assets/unreviewed.woff2', 'not approved'],
+    ['site/assets/unreviewed.txt', 'not approved'],
     ['public-files.json', JSON.stringify(['site/index.html', 'site/app.js', 'site/assets/video.mp4', 'site/assets/empty.mp4',
-      'site/assets/linked.mp4', 'private/secret.txt', 'site/assets/PROVENANCE.md'])],
+      'site/assets/linked.mp4', 'private/secret.txt', 'site/assets/PROVENANCE.md', 'site/assets/logo.svg',
+      'site/assets/barlow-regular.woff2', 'site/assets/barlow-license.txt', 'site/assets/unreviewed.svg',
+      'site/assets/unreviewed.woff2', 'site/assets/unreviewed.txt'])],
   ];
   const links = [];
   let server;
@@ -51,6 +59,27 @@ test('preview serves only approved site files with working media ranges', async 
     await new Promise((resolve, reject) => {
       server.once('error', reject);
       server.listen(0, '127.0.0.1', resolve);
+    });
+
+    await context.test('serves selected SVG, local font and license files with MIME, HEAD and ranges', async () => {
+      for (const [route, mime] of [['/assets/logo.svg', 'image/svg+xml'],
+        ['/assets/barlow-regular.woff2', 'font/woff2'], ['/assets/barlow-license.txt', 'text/plain; charset=utf-8']]) {
+        const expected = Buffer.from(files.find(([file]) => file === `site${route}`)[1]);
+        const full = await request(server, route);
+        assert.equal(full.status, 200, route);
+        assert.equal(full.headers['content-type'], mime);
+        assert.equal(full.headers['x-content-type-options'], 'nosniff');
+        assert.deepEqual(full.body, expected);
+        const head = await request(server, route, { method: 'HEAD' });
+        assert.equal(head.status, 200);
+        assert.equal(head.headers['content-type'], mime);
+        assert.equal(Number(head.headers['content-length']), expected.length);
+        assert.equal(head.body.length, 0);
+        const partial = await request(server, route, { headers: { Range: 'bytes=0-3' } });
+        assert.equal(partial.status, 206);
+        assert.equal(partial.headers['content-range'], `bytes 0-3/${expected.length}`);
+        assert.deepEqual(partial.body, expected.subarray(0, 4));
+      }
     });
 
     await context.test('serves HTML, JavaScript and HEAD using the manifest', async () => {
@@ -114,6 +143,8 @@ test('preview serves only approved site files with working media ranges', async 
     await context.test('rejects private paths, traversal, unknown files and unsupported methods', async () => {
       for (const route of ['/private/secret.txt', '/docs/project-context.local.md', '/public-files.json',
         '/.git/config', '/unlisted.html', '/assets/PROVENANCE.md', '/site/index.html',
+        '/assets/unreviewed.svg', '/assets/unreviewed.woff2', '/assets/unreviewed.txt',
+        '/assets/pliant-bold-expanded.woff2', '/assets/pliant-license.txt',
         '/../private/secret.txt', '/%2e%2e/private/secret.txt', '/%2e%2e/index.html',
         '/private/../index.html', '/%252e%252e/private/secret.txt', '/assets%5c..%5cindex.html', '//index.html']) {
         const response = await request(server, route);

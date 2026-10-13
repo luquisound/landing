@@ -6,9 +6,8 @@
 }
 .service-introduction { padding: var(--space-3) var(--space-3) 0; }
 .service-introduction h2 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: -.04em;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.2;
 }
 .service-media { padding: var(--space-3); }
 .service-media > img,
@@ -60,9 +59,7 @@
 }
 .service-topics h3,
 .service-related h3 {
-  font-family: var(--body);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: .9375rem;
   line-height: 1.4;
 }
 .service-topics p {

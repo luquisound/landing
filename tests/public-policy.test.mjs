@@ -26,6 +26,16 @@ const mp4Fixture = Buffer.alloc(24);
 mp4Fixture.writeUInt32BE(24);
 mp4Fixture.write('ftypisom', 4, 'ascii');
 mp4Fixture.write('isom', 16, 'ascii');
+const svgFixture = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><g fill="#FED903"><path d="M0 0L10 0L10 10Z"/></g></svg>');
+// A structural WOFF2 fixture exercises container checks, not font decoding.
+const woff2Fixture = Buffer.alloc(51);
+woff2Fixture.write('wOF2', 0, 'ascii');
+woff2Fixture.writeUInt32BE(0x00010000, 4);
+woff2Fixture.writeUInt32BE(woff2Fixture.length, 8);
+woff2Fixture.writeUInt16BE(1, 12);
+woff2Fixture.writeUInt32BE(56, 16);
+woff2Fixture.writeUInt32BE(1, 20);
+woff2Fixture[49] = 28;
 
 test('rejects private, generated, noncanonical and media paths even if added to a manifest', () => {
   for (const file of ['.env', '.env.example', 'docs/project-context.local.md', 'assets/PROVENANCE.md',
@@ -34,6 +44,8 @@ test('rejects private, generated, noncanonical and media paths even if added to 
     'docs\\a.md', 'assets/photo.jpg', 'assets/video.mp4', 'credentials.pem',
     'site/assets/PROVENANCE.md', 'site/notes.md', 'site/nested/app.js', 'site/assets/app.js',
     'site/index.mjs', 'site/assets/video.mov', 'Site/index.html', 'docs/app.js',
+    'site/assets/other.svg', 'site/assets/other.woff2', 'site/assets/other.txt',
+    'site/assets/nested/logo.svg', 'docs/logo.svg', 'docs/font.woff2',
     '.vercel/project.json', 'library/notes.md', 'docs/file:private.md', 'docs/*.md', 'docs/[a].md']) {
     assert.ok(pathIssues(file).length > 0, file);
   }
@@ -52,6 +64,81 @@ test('allows direct frontend files and media only inside the reviewed site locat
   }
   assert.deepEqual(manifestIssues(['public-files.json', 'site/index.html', 'site/assets/photo.jpg']), []);
   assert.ok(manifestIssues(['public-files.json', 'site/*.html']).length > 0);
+});
+
+test('brand assets are restricted to selected flat paths and bounded sizes', () => {
+  for (const file of ['site/assets/logo.svg', 'site/assets/logo-vertical.svg',
+    'site/assets/monogram.svg', 'site/assets/favicon.svg', 'site/assets/pliant-bold-expanded.woff2',
+    'site/assets/barlow-regular.woff2', 'site/assets/pliant-license.txt', 'site/assets/barlow-license.txt']) {
+    assert.deepEqual(pathIssues(file), [], file);
+    const limit = mediaFileSizeLimit(file);
+    assert.ok(limit > 0 && limit <= 1024 * 1024, file);
+    assert.deepEqual(fileContentIssues(file, Buffer.alloc(limit + 1)), ['media exceeds publication size limit'], file);
+  }
+});
+
+test('public SVGs allow passive geometry and reject active content, provenance and malformed markup', () => {
+  assert.deepEqual(fileContentIssues('site/assets/logo.svg', svgFixture), []);
+  assert.deepEqual(fileContentIssues('site/assets/logo.svg', Buffer.from([0xff])), ['invalid UTF-8']);
+  const valid = svgFixture.toString('utf8');
+  for (const unsafe of [
+    valid.replace('<g ', '<script/> <g '),
+    valid.replace('<g ', '<foreignObject/> <g '),
+    valid.replace('<g ', '<metadata>Private source</metadata><g '),
+    valid.replace('<g ', '<image href="https://example.invalid/image.png"/><g '),
+    valid.replace('<g ', '<style>path { fill: red; }</style><g '),
+    valid.replace('<g ', '<g onload="alert(1)" '),
+    valid.replace('#FED903', 'url(https://example.invalid/fill)'),
+    valid.replace('#FED903', '&#35;FED903'),
+    valid.replace('<g ', '<g href="#local" '),
+    valid.replace('<g ', '<g fill="#000000" '),
+    valid.replace('viewBox=', 'xmlns:xlink="http://www.w3.org/1999/xlink" viewBox='),
+    '<!DOCTYPE svg [<!ENTITY external SYSTEM "https://example.invalid">]>' + valid,
+    '<!-- Editor metadata -->' + valid,
+    valid + valid,
+    valid.replace('</g>', '</path>'),
+    valid.replace('</svg>', ''),
+    valid.replace('viewBox="0 0 10 10"', 'viewBox="0 0 -10 10"'),
+    valid.replace('viewBox="0 0 10 10"', ''),
+    valid.replace('<path ', 'text<path '),
+    valid.replace('<path ', '<use href="#path"/><path '),
+  ]) assert.ok(fileContentIssues('site/assets/logo.svg', Buffer.from(unsafe)).length > 0, unsafe);
+});
+
+test('WOFF2 validation rejects truncation, invalid signatures, headers and compressed bounds', () => {
+  assert.deepEqual(fileContentIssues('site/assets/barlow-regular.woff2', woff2Fixture), []);
+  for (const length of [0, 4, 47, 48, 50]) {
+    assert.ok(fileContentIssues('site/assets/barlow-regular.woff2', woff2Fixture.subarray(0, length)).length > 0);
+  }
+  for (const [offset, value, width] of [[0, 0, 4], [4, 0x74746366, 4], [8, 100, 4],
+    [12, 0, 2], [14, 1, 2], [16, 17 * 1024 * 1024, 4], [20, 100, 4], [28, 50, 4], [44, 1, 4]]) {
+    const changed = Buffer.from(woff2Fixture);
+    if (width === 4) changed.writeUInt32BE(value, offset);
+    else changed.writeUInt16BE(value, offset);
+    assert.ok(fileContentIssues('site/assets/barlow-regular.woff2', changed).length > 0, `${offset}: ${value}`);
+  }
+  const invalidDirectory = Buffer.from(woff2Fixture);
+  invalidDirectory[49] = 0x80;
+  assert.deepEqual(fileContentIssues('site/assets/barlow-regular.woff2', invalidDirectory), ['invalid WOFF2 directory']);
+  const overlappingBlock = Buffer.from(woff2Fixture);
+  overlappingBlock[49] = 0x81;
+  overlappingBlock[50] = 0;
+  assert.deepEqual(fileContentIssues('site/assets/barlow-regular.woff2', overlappingBlock), ['invalid WOFF2 compressed block bounds']);
+});
+
+test('font licenses must be bounded, nonempty UTF-8 text without credentials or binary controls', () => {
+  const file = 'site/assets/pliant-license.txt';
+  assert.deepEqual(fileContentIssues(file, Buffer.from('SIL OPEN FONT LICENSE Version 1.1\nCopyright Example\n')), []);
+  for (const bytes of [Buffer.from([0xff]), Buffer.from('\n\t '), Buffer.from('text\0binary'),
+    Buffer.from('text\x07binary'), Buffer.from('gh' + 'p_' + 'a'.repeat(36))]) {
+    assert.ok(fileContentIssues(file, bytes).length > 0);
+  }
+  const changed = Buffer.from(woff2Fixture);
+  changed[50] = 1;
+  assert.ok(indexedContentIssues('site/assets/barlow-regular.woff2', changed, woff2Fixture)
+    .includes('index media differs from the reviewed working copy'));
+  assert.ok(indexedContentIssues('site/assets/logo.svg', svgFixture, Buffer.from(svgFixture.toString().replace('#FED903', '#FFFFFF')))
+    .includes('index media differs from the reviewed working copy'));
 });
 
 test('media checks enforce approved paths, signatures, format-specific bounds and no common image metadata', () => {
@@ -188,10 +275,14 @@ test('publication guard rejects unsafe staged content when the working copy is s
     for (const file of ['scripts/check-public.mjs', 'scripts/public-policy.mjs']) {
       await copyFile(path.join(repository, file), path.join(directory, file));
     }
-    const files = ['public-files.json', 'scripts/check-public.mjs', 'scripts/public-policy.mjs', 'site/index.html', 'site/assets/photo.jpg'];
+    const files = ['public-files.json', 'scripts/check-public.mjs', 'scripts/public-policy.mjs', 'site/index.html',
+      'site/assets/photo.jpg', 'site/assets/logo.svg', 'site/assets/barlow-regular.woff2', 'site/assets/barlow-license.txt'];
     await writeFile(path.join(directory, 'public-files.json'), JSON.stringify(files));
     await writeFile(path.join(directory, 'site', 'index.html'), '<p>Public</p>');
     await writeFile(path.join(directory, 'site', 'assets', 'photo.jpg'), jpegFixture);
+    await writeFile(path.join(directory, 'site', 'assets', 'logo.svg'), svgFixture);
+    await writeFile(path.join(directory, 'site', 'assets', 'barlow-regular.woff2'), woff2Fixture);
+    await writeFile(path.join(directory, 'site', 'assets', 'barlow-license.txt'), 'SIL OPEN FONT LICENSE Version 1.1\n');
     git('init', '--quiet');
     git('add', '--', ...files);
     assert.match(runGuard().toString('utf8'), /Public boundary passed/);
@@ -208,6 +299,11 @@ test('publication guard rejects unsafe staged content when the working copy is s
     git('add', '--', 'site/assets/photo.jpg');
     await writeFile(path.join(directory, 'site', 'assets', 'photo.jpg'), jpegFixture);
     assert.throws(runGuard, (error) => error.stderr.toString('utf8').includes('(index): index media differs'));
+    git('add', '--', 'site/assets/photo.jpg');
+    await writeFile(path.join(directory, 'site', 'assets', 'logo.svg'), svgFixture.toString().replace('<g ', '<g onload="alert(1)" '));
+    git('add', '--', 'site/assets/logo.svg');
+    await writeFile(path.join(directory, 'site', 'assets', 'logo.svg'), svgFixture);
+    assert.throws(runGuard, (error) => error.stderr.toString('utf8').includes('(index): unapproved SVG attribute or value'));
   } finally {
     assert.equal(path.dirname(path.resolve(directory)).toLowerCase(), path.resolve(tmpdir()).toLowerCase());
     assert.match(path.basename(directory), /^luquisound-index-/);

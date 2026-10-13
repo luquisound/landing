@@ -3,6 +3,7 @@ import { createReadStream } from 'node:fs';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pathIssues } from './public-policy.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contentTypes = {
@@ -10,12 +11,11 @@ const contentTypes = {
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
   '.png': 'image/png',
-  '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
   '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
 };
 
 function approvedSitePaths(manifest) {
@@ -23,8 +23,7 @@ function approvedSitePaths(manifest) {
     throw new TypeError('The public manifest must be an array of paths.');
   }
   return new Set(manifest.filter((entry) => {
-    const pattern = /^site\/(?:[a-zA-Z0-9][a-zA-Z0-9_-]*\.(?:html|css|js)|assets\/[a-zA-Z0-9][a-zA-Z0-9_-]*\.(?:jpg|jpeg|png|webp|svg|mp4|webm))$/;
-    return pattern.test(entry);
+    return entry.startsWith('site/') && pathIssues(entry).length === 0;
   }));
 }
 

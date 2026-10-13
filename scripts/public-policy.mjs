@@ -6,7 +6,12 @@ const textExtensions = new Set(['.md', '.mjs', '.json', '.yml']);
 const rootFiles = new Set(['.gitignore', '.gitattributes', '.editorconfig', '.github/CODEOWNERS']);
 const frontendPath = /^site\/[A-Za-z0-9][A-Za-z0-9._-]*\.(?:html|css|js)$/;
 const mediaPath = /^site\/assets\/[A-Za-z0-9][A-Za-z0-9._-]*\.(?:jpg|png|mp4)$/;
+const vectorPaths = new Set(['site/assets/logo.svg', 'site/assets/logo-vertical.svg',
+  'site/assets/monogram.svg', 'site/assets/favicon.svg']);
+const fontPaths = new Set(['site/assets/pliant-bold-expanded.woff2', 'site/assets/barlow-regular.woff2']);
+const licensePaths = new Set(['site/assets/pliant-license.txt', 'site/assets/barlow-license.txt']);
 const textSizeLimit = 256 * 1024;
+const fontSizeLimit = 1024 * 1024;
 const imageSizeLimit = 8 * 1024 * 1024;
 const videoSizeLimit = 35 * 1024 * 1024;
 const credentialPatterns = [
@@ -21,8 +26,113 @@ const credentialPatterns = [
 ];
 
 export function mediaFileSizeLimit(file) {
+  if (fontPaths.has(file)) return fontSizeLimit;
+  if (vectorPaths.has(file) || licensePaths.has(file)) return textSizeLimit;
   if (!mediaPath.test(file)) return undefined;
   return path.posix.extname(file) === '.mp4' ? videoSizeLimit : imageSizeLimit;
+}
+
+function vectorIssues(content) {
+  // Public logos use a closed, passive subset; original editor SVGs stay private.
+  if (/[&]|<\s*[!?]/.test(content)) return ['SVG entities, declarations and comments are prohibited'];
+  const tokens = content.match(/<[^>]*>|[^<]+/g) ?? [];
+  if (tokens.join('') !== content) return ['invalid SVG markup'];
+  const stack = [];
+  let root = false;
+  let paths = 0;
+  for (const token of tokens) {
+    if (!token.startsWith('<')) {
+      if (token.trim()) return ['SVG text is prohibited'];
+      continue;
+    }
+    const tag = /^<(\/?)(svg|g|path)\b([^<>]*?)(\/?)>$/.exec(token);
+    if (!tag) return ['unapproved SVG element'];
+    const [, closing, name, rawAttributes, selfClosing] = tag;
+    if (closing) {
+      if (selfClosing || rawAttributes.trim() || stack.pop() !== name) return ['invalid SVG nesting'];
+      continue;
+    }
+    if (name === 'svg') {
+      if (root || stack.length) return ['SVG must have one root'];
+      root = true;
+    } else if (stack.length === 0 || stack.at(-1) === 'path') return ['invalid SVG nesting'];
+    const attributes = new Map();
+    let remaining = rawAttributes;
+    while (remaining.trim()) {
+      const attribute = /^\s+([A-Za-z][A-Za-z0-9-]*)\s*=\s*(["'])([^"'<>]*)\2/.exec(remaining);
+      if (!attribute || attributes.has(attribute[1])) return ['invalid SVG attributes'];
+      attributes.set(attribute[1], attribute[3]);
+      remaining = remaining.slice(attribute[0].length);
+    }
+    const numeric = /^[\d.eE+,\s-]+$/;
+    for (const [key, value] of attributes) {
+      const valid = (key === 'xmlns' && name === 'svg' && value === 'http://www.w3.org/2000/svg')
+        || (key === 'viewBox' && name === 'svg' && value.trim().split(/[\s,]+/).length === 4
+          && numeric.test(value) && value.trim().split(/[\s,]+/).every((part) => Number.isFinite(Number(part)))
+          && value.trim().split(/[\s,]+/).slice(2).every((part) => Number(part) > 0))
+        || (['width', 'height'].includes(key) && name === 'svg' && /^\d+(?:\.\d+)?$/.test(value) && Number(value) > 0)
+        || (key === 'fill' && /^(?:#[\da-fA-F]{3}(?:[\da-fA-F]{3})?|none)$/.test(value))
+        || (['fill-rule', 'clip-rule'].includes(key) && /^(?:evenodd|nonzero)$/.test(value))
+        || (key === 'd' && name === 'path' && /^[Mm]/.test(value) && /^[MmZzLlHhVvCcSsQqTtAa\d.eE+,\s-]+$/.test(value))
+        || (key === 'transform' && /^(?:(?:matrix|translate|scale|rotate|skewX|skewY)\([\d.eE+,\s-]+\)\s*)+$/.test(value));
+      if (!valid) return ['unapproved SVG attribute or value'];
+    }
+    if (name === 'svg' && (!attributes.has('xmlns') || !attributes.has('viewBox'))) return ['SVG root needs xmlns and viewBox'];
+    if (name === 'path') {
+      if (!attributes.has('d')) return ['SVG path needs geometry'];
+      paths += 1;
+    }
+    if (!selfClosing) stack.push(name);
+  }
+  return root && paths && stack.length === 0 ? [] : ['incomplete SVG document'];
+}
+
+function fontIssues(bytes) {
+  if (bytes.length < 48 || bytes.toString('ascii', 0, 4) !== 'wOF2') return ['invalid WOFF2 signature'];
+  const flavor = bytes.readUInt32BE(4);
+  const tables = bytes.readUInt16BE(12);
+  const compressed = bytes.readUInt32BE(20);
+  const sfntSize = bytes.readUInt32BE(16);
+  if (![0x00010000, 0x4f54544f].includes(flavor) || bytes.readUInt32BE(8) !== bytes.length
+    || tables === 0 || bytes.readUInt16BE(14) !== 0 || compressed === 0
+    || sfntSize < 12 + tables * 16 || sfntSize > 16 * 1024 * 1024
+    || 48 + tables * 2 + compressed > bytes.length) return ['invalid WOFF2 header or bounds'];
+  if (bytes.subarray(28, 48).some((byte) => byte !== 0)) return ['WOFF2 metadata and private blocks are prohibited'];
+  let offset = 48;
+  const readLength = () => {
+    let value = 0;
+    for (let count = 0; count < 5; count += 1) {
+      if (offset >= bytes.length) throw new Error('truncated directory');
+      const byte = bytes[offset++];
+      if ((count === 0 && byte === 0x80) || value > 0x1ffffff) throw new Error('invalid length');
+      value = value * 128 + (byte & 0x7f);
+      if ((byte & 0x80) === 0) return value;
+    }
+    throw new Error('invalid length');
+  };
+  try {
+    for (let table = 0; table < tables; table += 1) {
+      if (offset >= bytes.length) throw new Error('truncated directory');
+      const flags = bytes[offset++];
+      const index = flags & 0x3f;
+      let tag = index === 10 ? 'glyf' : index === 11 ? 'loca' : '';
+      if (index === 63) {
+        if (offset + 4 > bytes.length) throw new Error('truncated tag');
+        tag = bytes.toString('ascii', offset, offset + 4);
+        offset += 4;
+      }
+      if (readLength() > 16 * 1024 * 1024) throw new Error('oversized table');
+      const transformed = ['glyf', 'loca'].includes(tag) ? (flags >> 6) !== 3 : (flags >> 6) !== 0;
+      if (transformed && readLength() > 16 * 1024 * 1024) throw new Error('oversized table');
+    }
+  } catch {
+    return ['invalid WOFF2 directory'];
+  }
+  const end = offset + compressed;
+  if (end > bytes.length || bytes.length - end > 3 || bytes.subarray(end).some((byte) => byte !== 0)) {
+    return ['invalid WOFF2 compressed block bounds'];
+  }
+  return [];
 }
 
 export async function readPublicBytes(target, sizeLimit = textSizeLimit) {
@@ -63,6 +173,18 @@ export function mediaIssues(file, bytes) {
   if (sizeLimit === undefined) return ['unapproved media path'];
   if (!Buffer.isBuffer(bytes)) return ['media must be binary bytes'];
   if (bytes.length > sizeLimit) return ['media exceeds publication size limit'];
+  if (fontPaths.has(file)) return fontIssues(bytes);
+  if (vectorPaths.has(file) || licensePaths.has(file)) {
+    let content;
+    try { content = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+    catch { return ['invalid UTF-8']; }
+    const issues = contentIssues(content);
+    if (vectorPaths.has(file)) issues.push(...vectorIssues(content));
+    if (licensePaths.has(file) && (!content.trim() || /[\x01-\x08\x0b\x0c\x0e-\x1f]/.test(content))) {
+      issues.push('invalid license text');
+    }
+    return issues;
+  }
   const extension = path.posix.extname(file);
   if (extension === '.jpg') {
     if (bytes.length < 4 || !bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))
@@ -146,7 +268,7 @@ export function pathIssues(file) {
     issues.push('private or generated directory');
   }
   if (parts.some((p) => /^provenance\.md$/i.test(p))) issues.push('private provenance');
-  const approvedFrontend = frontendPath.test(file) || mediaPath.test(file);
+  const approvedFrontend = frontendPath.test(file) || mediaFileSizeLimit(file) !== undefined;
   const infrastructure = !parts.some((part) => part.toLowerCase() === 'site')
     && (rootFiles.has(file) || textExtensions.has(path.posix.extname(file)));
   if (!approvedFrontend && !infrastructure) issues.push('unapproved file type or publication location');
