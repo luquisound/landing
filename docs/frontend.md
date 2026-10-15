@@ -25,7 +25,7 @@ width. Both are silent and play without playback controls. Static posters,
 reduced-motion handling and hidden-document pausing are provided.
 
 Services retain three pillars and link to related work. Work contains eight
-case collections, ten manually played clips and nine existing photographs.
+case collections, ten manually played clips and eight existing photographs.
 Cases can belong to multiple filters. Case links, filters and columns restore
 through browser history. Video sources are released when their dialog closes
 or the selected media changes.
