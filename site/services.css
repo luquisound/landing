@@ -84,6 +84,80 @@
 }
 .service-related li a span { color: var(--yellow); }
 .service-related li a:hover { color: var(--yellow); }
+.service-treatment {
+  min-width: 0;
+  padding: var(--space-3) var(--space-3) 0;
+}
+.service-benefits {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.25em;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.service-benefits li::marker { color: var(--yellow); }
+.service-treatment h3 { font-size: 1rem; line-height: 1.4; }
+.service-treatment-note {
+  margin: var(--space-2) 0 var(--space-3);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.service-sector { border-top: 1px solid var(--line); }
+.service-sector:last-child { border-bottom: 1px solid var(--line); }
+.service-sector summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 80px;
+  padding: var(--space-2) 0;
+  list-style: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: color var(--duration-ui);
+}
+.service-sector summary::-webkit-details-marker { display: none; }
+.service-sector summary:hover,
+.service-sector summary:active,
+.service-sector[open] > summary { color: var(--yellow); }
+.service-sector-name {
+  min-width: 0;
+  font: 700 1rem/1.4 var(--display);
+  font-stretch: 125%;
+}
+.service-sector-meta {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font: 400 .875rem/1.5 var(--body);
+}
+.service-sector-toggle { flex-shrink: 0; color: var(--yellow); font-size: 1.75rem; }
+.service-sector[open] .service-sector-toggle { font-size: 0; }
+.service-sector[open] .service-sector-toggle::after { content: "−"; font-size: 1.75rem; }
+.service-sector-body { padding-bottom: var(--space-3); }
+.service-sector-body > p,
+.service-levels p { color: var(--muted); font-size: 1rem; line-height: 1.6; }
+.service-sector-body figure { margin-block: var(--space-3); }
+.service-sector-body figcaption { margin-top: var(--space-1); color: var(--muted); font-size: .875rem; line-height: 1.6; }
+/* Frame the diagram area of each original plate; the explanation remains HTML text. */
+.service-diagram {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--diagram-width) / var(--diagram-height);
+}
+.service-diagram img {
+  position: absolute;
+  width: calc(108000% / var(--diagram-width));
+  max-width: none;
+  height: auto;
+  left: calc(-100% * var(--diagram-x) / var(--diagram-width));
+  top: calc(-100% * var(--diagram-y) / var(--diagram-height));
+}
+.service-diagram-doors { --diagram-x: 96; --diagram-y: 684; --diagram-width: 880; --diagram-height: 880; }
+.service-diagram-floor { --diagram-x: 190; --diagram-y: 704; --diagram-width: 704; --diagram-height: 880; }
+.service-diagram-roof { --diagram-x: 96; --diagram-y: 668; --diagram-width: 896; --diagram-height: 908; }
+.service-levels { list-style: none; padding: 0; margin: 0; }
+.service-levels li + li { margin-top: var(--space-2); }
+.service-levels li > span { display: block; color: var(--yellow); margin-bottom: var(--space-1); }
 @media (min-width: 700px) {
   #service-dialog .gallery-body { grid-template-columns: 1.15fr 1fr; }
   .service-introduction {
@@ -97,4 +171,7 @@
     padding: var(--space-4);
   }
   #service-dialog .gallery-information { grid-column: 2; grid-row: 2; padding-top: 0; }
+  .service-treatment { grid-column: 2; grid-row: 2; padding-inline: var(--space-4); }
+  #service-dialog[data-service="insonorizacion"] .service-media { grid-row: 1 / span 3; align-self: start; }
+  #service-dialog[data-service="insonorizacion"] .gallery-information { grid-row: 3; }
 }

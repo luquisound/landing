@@ -24,8 +24,13 @@ montage from 1000 px, or the complete vertical workshop sequence below that
 width. Both are silent and play without playback controls. Static posters,
 reduced-motion handling and hidden-document pausing are provided.
 
-Services retain three pillars and link to related work. Work contains eight
-case collections, ten manually played clips and eight existing photographs.
+Services retain three pillars and link to related work.
+Soundproofing explains benefits and treatment levels for doors, floors and
+roofs in native disclosure controls, with selected diagrams and HTML text.
+Door levels add treated surfaces; floor and roof levels add material layers.
+The existing BMW and Corsa media remain examples of door work.
+Work contains eight case collections, ten manually played clips and eight
+existing photographs.
 Cases can belong to multiple filters. Case links, filters and columns restore
 through browser history. Video sources are released when their dialog closes
 or the selected media changes.

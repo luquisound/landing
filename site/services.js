@@ -7,12 +7,8 @@
   const services = {
     insonorizacion: {
       title: "Insonorización",
-      description: "Tratamiento de puertas y preparación del montaje de los parlantes, cuidando los materiales y la terminación del interior.",
-      topics: [
-        ["Tratamiento de puertas", "Aplicación de material insonorizante en las puertas como parte de la intervención del sistema de audio."],
-        ["Materiales y preparación", "Acceso al interior de la puerta, preparación de las superficies y colocación del tratamiento en las zonas de trabajo."],
-        ["Montaje y terminación", "Instalación de los parlantes y armado del panel, conservando una terminación integrada al vehículo."]
-      ],
+      description: "Tratamientos en puertas, piso y techo que ayudan a reducir ruidos y vibraciones para viajar en un habitáculo más confortable.",
+      topics: [],
       caseIds: ["bmw-335i", "chevrolet-corsa"]
     },
     audio: {
@@ -44,6 +40,7 @@
   const caption = document.getElementById("service-dialog-caption");
   const picker = document.getElementById("service-dialog-clips");
   const topics = document.getElementById("service-dialog-topics");
+  const soundproofing = document.getElementById("service-dialog-soundproofing");
   const related = document.getElementById("service-dialog-related");
   const links = document.getElementById("service-dialog-work-links");
 
@@ -73,6 +70,11 @@
     const id = card.dataset.openService;
     const service = services[id];
     if (!service) return null;
+    dialog.dataset.service = id;
+    soundproofing.hidden = id !== "insonorizacion";
+    soundproofing.querySelectorAll("details").forEach(item => { item.open = false; });
+    topics.hidden = service.topics.length === 0;
+    related.querySelector("h3").textContent = id === "insonorizacion" ? "Trabajos en puertas" : "Trabajos relacionados";
     releaseVideo();
     image.hidden = false;
     evidence.hidden = true;
