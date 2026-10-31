@@ -55,10 +55,8 @@
   font-size: .875rem;
   line-height: 1.6;
 }
-@media (max-width: 699px) {
-  /* Let photographs keep their own proportions without letterboxing. */
-  #service-dialog-image { height: auto; }
-}
+/* Let photographs keep their own proportions without letterboxing. */
+#service-dialog-image { height: auto; }
 #service-dialog-caption strong {
   display: block;
   color: var(--white);
