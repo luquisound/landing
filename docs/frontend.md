@@ -25,6 +25,9 @@ width. Both are silent and play without playback controls. Static posters,
 reduced-motion handling and hidden-document pausing are provided.
 
 Services retain three pillars and link to related work.
+The Services index keeps three columns from 700 px and stacks on narrower
+screens. Image panels account for viewport height, headings, captions and the
+floating navigation. Short viewports scroll without clipping controls.
 Soundproofing explains benefits and treatment levels for doors, floors and
 roofs in native disclosure controls, with selected diagrams and HTML text.
 Door levels add treated surfaces; floor and roof levels add material layers.

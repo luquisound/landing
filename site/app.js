@@ -169,6 +169,14 @@ if (serviceDialog) {
     }
     if (leavingPage) return;
     if (history.state?.luquisoundService) {
+      const opener = dialogOpeners.get(serviceDialog);
+      window.addEventListener("popstate", () => {
+        requestAnimationFrame(() => {
+          if (!leavingPage && !document.querySelector("dialog[open]") && opener?.isConnected && opener.getClientRects().length) {
+            opener.focus({ preventScroll: true });
+          }
+        });
+      }, { once: true });
       history.back();
       return;
     }

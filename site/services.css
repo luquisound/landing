@@ -1,3 +1,35 @@
+.services-page {
+  --services-heading-size: clamp(2rem, 7vw, 5.5rem);
+  --services-top: max(clamp(24px, 5svh, 48px), calc(env(safe-area-inset-top) + 24px));
+  --services-heading-gap: clamp(20px, 3svh, 32px);
+  --services-caption-space: 5rem;
+  --services-nav-space: calc(7rem + env(safe-area-inset-bottom));
+}
+.services-page > .page-shell {
+  padding-top: var(--services-top);
+  padding-bottom: var(--services-nav-space);
+}
+.services-page > .page-shell > .page-heading { margin-bottom: var(--services-heading-gap); }
+.services-page > .page-shell > .page-heading h1 { font-size: var(--services-heading-size); }
+.services-page > .page-shell .work-card {
+  scroll-margin-block: var(--services-top) var(--services-nav-space);
+}
+@media (min-width: 700px) {
+  /* Keep the original proportions until the viewport needs a shorter image. */
+  .services-page > .page-shell .work-image {
+    width: 100%;
+    max-height: max(15rem, calc(100svh - var(--services-top) - var(--services-heading-size) * 1.1 - var(--services-heading-gap) - var(--services-caption-space) - var(--services-nav-space)));
+  }
+}
+@media (min-width: 700px) and (max-width: 999px) {
+  .services-page { --services-caption-space: 7.5rem; }
+}
+@media (max-width: 699px) {
+  .services-page { --services-nav-space: calc(9rem + env(safe-area-inset-bottom)); }
+  .services-page > .page-shell .work-caption { flex-wrap: wrap; }
+  .services-page > .page-shell .work-name { flex: 1 1 12rem; }
+}
+
 #service-dialog > .dialog-header {
   position: sticky;
   top: 0;
