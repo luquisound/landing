@@ -28,9 +28,12 @@ Services retain three pillars and link to related work.
 Soundproofing explains benefits and treatment levels for doors, floors and
 roofs in native disclosure controls, with selected diagrams and HTML text.
 Door levels add treated surfaces; floor and roof levels add material layers.
-Selected Mustang and Silverado photographs show soundproofing processes,
-followed by the existing BMW and Corsa door-work clips. Service evidence
-supports both photographs and manually played videos.
+In Services, soundproofing examples appear in this order: Mustang photographs,
+BMW door-work clip, Silverado photographs and Corsa door-work clip. Service
+evidence supports both photographs and manually played videos.
+The Mustang collection contains two process photographs followed by its
+exterior; the Silverado contains three process photographs and its exterior
+last. Prepared exterior framing is also used by both gallery thumbnails.
 Work opens with the Mustang and Silverado soundproofing cases, followed by
 the eight existing case collections, ten manually played clips and eight
 standalone photographs.

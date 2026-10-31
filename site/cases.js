@@ -9,10 +9,8 @@ window.LuquisoundCases = [
     steps: ["Material de insonorización sobre el piso y el túnel central, con los asientos retirados.", "Detalles del tratamiento en la zona trasera del habitáculo.", "Vista exterior del Mustang en el taller."],
     serviceRefs: ["insonorizacion"],
     media: [
-      { type: "image", src: "assets/case-mustang-piso.jpg", alt: "Piso y túnel central del Mustang con material BRÜDER y los asientos retirados", title: "Tratamiento del piso" },
       { type: "image", src: "assets/case-mustang-tunel.jpg", alt: "Detalle del material de insonorización sobre el piso y el túnel del Mustang", title: "Piso y túnel central" },
       { type: "image", src: "assets/case-mustang-trasera.jpg", alt: "Material de insonorización en la zona trasera del habitáculo del Mustang", title: "Zona trasera del habitáculo" },
-      { type: "image", src: "assets/case-mustang-proceso.jpg", alt: "Otra vista del interior del Mustang con el tratamiento de insonorización a la vista", title: "Detalle del proceso" },
       { type: "image", src: "assets/case-mustang-insonorizacion.jpg", alt: "Vista exterior del Ford Mustang verde en el taller Luquisound", title: "Mustang en el taller" }
     ]
   },
@@ -20,13 +18,12 @@ window.LuquisoundCases = [
     id: "chevrolet-silverado-insonorizacion",
     title: "Chevrolet Silverado",
     categories: ["insonorizacion"],
-    summary: "El exterior de la Silverado y una selección de fotos del proceso de insonorización de su cabina, desde el desarmado hasta la colocación del material.",
-    steps: ["Desarmado del interior para acceder a las superficies de la cabina.", "Material de insonorización sobre el piso y el túnel central.", "Detalles del frente de la cabina antes y después de la colocación del material."],
+    summary: "Una selección del proceso de insonorización de la cabina, con vistas del piso y del frente antes y después de colocar el material. Cierra con el exterior de la Silverado en el taller.",
+    steps: ["Material de insonorización en el piso, el túnel central y la zona trasera.", "Frente de la cabina con el tablero retirado y el panel a la vista.", "Material colocado en el panel frontal de la cabina."],
     serviceRefs: ["insonorizacion"],
     media: [
-      { type: "image", src: "assets/case-silverado-desarmado.jpg", alt: "Interior de la Silverado durante el desarmado del tablero y la cabina", title: "Desarmado del interior" },
-      { type: "image", src: "assets/case-silverado-piso.jpg", alt: "Piso y túnel central de la Silverado con material de insonorización BRÜDER", title: "Tratamiento del piso" },
-      { type: "image", src: "assets/case-silverado-frente.jpg", alt: "Piso tratado y frente de la cabina de la Silverado con el tablero retirado", title: "Frente de la cabina" },
+      { type: "image", src: "assets/case-silverado-piso.jpg", alt: "Piso, túnel central y zona trasera de la cabina de la Silverado con material de insonorización BRÜDER", title: "Piso y zona trasera" },
+      { type: "image", src: "assets/case-silverado-frente.jpg", alt: "Frente de la cabina de la Silverado con el tablero retirado y el panel todavía sin material de insonorización", title: "Frente con el tablero retirado" },
       { type: "image", src: "assets/case-silverado-panel.jpg", alt: "Material de insonorización colocado en el panel frontal de la cabina de la Silverado", title: "Tratamiento del panel frontal" },
       { type: "image", src: "assets/case-silverado-insonorizacion.jpg", alt: "Vista exterior de la Chevrolet Silverado verde en el taller Luquisound", title: "Silverado en el taller" }
     ]

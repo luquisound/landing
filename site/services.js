@@ -9,7 +9,7 @@
       title: "Insonorización",
       description: "Tratamientos en puertas, piso y techo que ayudan a reducir ruidos y vibraciones para viajar en un habitáculo más confortable.",
       topics: [],
-      caseIds: ["ford-mustang-insonorizacion", "chevrolet-silverado-insonorizacion", "bmw-335i", "chevrolet-corsa"]
+      caseIds: ["ford-mustang-insonorizacion", "bmw-335i", "chevrolet-silverado-insonorizacion", "chevrolet-corsa"]
     },
     audio: {
       title: "Audio",
