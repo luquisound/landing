@@ -77,6 +77,9 @@
   .work-gallery-page .project-steps li + li { margin-top: 0; }
 }
 @media (max-width: 699px) {
+  /* Only photographs size the stage intrinsically; videos retain their player. */
+  .work-gallery-page .lightbox-stage:has(img:not([hidden])) { height: auto; }
+  .work-gallery-page .lightbox-stage img { height: auto; }
   .work-gallery-page .gallery-toolbar { display: block; }
   .work-gallery-page .gallery-wall, .work-gallery-page .gallery-wall[data-columns] { columns: 1; padding-inline: 8px; }
   .work-gallery-page .card-tall { aspect-ratio: 4 / 5; }
