@@ -64,6 +64,7 @@ coverage/
 !/site/servicios.html
 !/site/trabajos.html
 !/site/contacto.html
+!/site/contact.css
 !/site/styles.css
 !/site/app.js
 !/site/cases.js

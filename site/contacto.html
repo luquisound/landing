@@ -9,26 +9,54 @@
   <title>Contacto — Luquisound</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="contact.css">
   <script src="app.js" defer></script>
 </head>
-<body class="inner-page">
+<body class="inner-page contact-page">
   <a class="skip-link" href="#contenido">Ir al contenido</a>
 
-  <main class="page-shell" id="contenido">
-    <header class="page-heading">
-      <h1>Hablemos<span class="yellow-dot">.</span></h1>
+  <main class="page-shell contact-shell" id="contenido">
+    <header class="page-heading contact-introduction">
+      <h1>Hablemos de tu proyecto<span class="yellow-dot">.</span></h1>
+      <p>Contanos qué vehículo tenés y qué te gustaría mejorar.</p>
     </header>
-    <div class="contact-layout">
-      <dl class="contact-details">
-        <div><dt>WhatsApp</dt><dd><a href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer">11 7358-1958 <span aria-hidden="true">↗</span></a></dd></div>
-        <div><dt>Instagram</dt><dd><a href="https://www.instagram.com/luquisound.ok/" target="_blank" rel="noopener noreferrer">@luquisound.ok <span aria-hidden="true">↗</span></a></dd></div>
-        <div><dt>Taller</dt><dd><a href="https://maps.app.goo.gl/3zowfaNXyXmVk4ch8" target="_blank" rel="noopener noreferrer">Av. Díaz Vélez 1166, Ciudadela <span aria-hidden="true">↗</span></a></dd></div>
-        <div><dt>Días y horarios</dt><dd>Lunes a viernes de 9 a 17 h</dd></div>
-      </dl>
-      <div class="contact-action">
-        <button class="button button-yellow" type="button" data-open-contact data-app-only hidden aria-haspopup="dialog">Contanos tu idea <span aria-hidden="true">↗</span></button>
-        <noscript><p class="form-note">Podés <a class="text-link" href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer">consultarnos directamente por WhatsApp</a> con tu vehículo y lo que querés mejorar.</p></noscript>
-      </div>
+    <div class="contact-content">
+      <section class="contact-inquiry" aria-label="Prepará tu consulta">
+        <form id="consultation-form" aria-labelledby="consultation-title" aria-describedby="consultation-note">
+          <h2 id="consultation-title">Tu consulta</h2>
+          <fieldset class="contact-fields" id="consultation-fields" disabled>
+            <legend class="sr-only">Datos de tu consulta</legend>
+            <label for="vehicle">¿Qué auto tenés?</label>
+            <input id="vehicle" name="vehicle" type="text" placeholder="Marca, modelo y año" maxlength="100" autocomplete="off" required>
+            <label for="interest">¿Qué te interesa?</label>
+            <select id="interest" name="interest"><option value="Audio">Audio</option><option value="Insonorización">Insonorización</option><option value="Personalización">Personalización</option><option value="Asesoramiento">Todavía no lo sé</option></select>
+            <label for="idea">Contanos tu idea</label>
+            <textarea id="idea" name="idea" placeholder="Qué te gustaría mejorar" rows="4" maxlength="600" required></textarea>
+            <button class="button button-yellow" id="review-consultation" type="submit" data-app-only hidden>Revisar consulta <span aria-hidden="true">↗</span></button>
+          </fieldset>
+          <p class="form-note" id="consultation-note">Vehículo y descripción son obligatorios. Podés revisar el mensaje antes de abrir WhatsApp.</p>
+          <noscript><p class="form-note">Para preparar el mensaje en esta página necesitás JavaScript. También podés <a class="text-link" href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer">consultarnos directamente por WhatsApp</a>.</p></noscript>
+        </form>
+        <section class="contact-preview" id="consultation-preview" aria-labelledby="preview-title" hidden>
+          <h2 id="preview-title">Revisá tu consulta</h2>
+          <textarea id="preview-message" aria-label="Vista previa del mensaje" readonly rows="8"></textarea>
+          <div class="contact-actions"><a class="button button-yellow" id="whatsapp-consultation" href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer" aria-describedby="whatsapp-note">Continuar en WhatsApp <span aria-hidden="true">↗</span></a><button class="text-link" id="copy-consultation" type="button">Copiar mensaje</button><button class="text-link" id="edit-consultation" type="button">Editar</button></div>
+          <p class="form-note" id="whatsapp-note">Se abre WhatsApp con el texto preparado. Vos confirmás el envío desde el chat.</p>
+          <p class="form-note" id="copy-status" role="status">Revisá tu consulta. El mensaje se envía cuando lo confirmás en WhatsApp.</p>
+        </section>
+      </section>
+      <aside class="contact-location" aria-labelledby="workshop-title">
+        <h2 id="workshop-title">El taller</h2>
+        <a class="contact-address" href="https://maps.app.goo.gl/3zowfaNXyXmVk4ch8" target="_blank" rel="noopener noreferrer">Av. Díaz Vélez 1166, Ciudadela <span aria-hidden="true">↗</span></a>
+        <p class="contact-hours">Lunes a viernes de 9 a 17 h</p>
+        <div class="contact-alternatives">
+          <p>También podés hablar con nosotros por estos canales:</p>
+          <dl class="contact-channels">
+            <div><dt>WhatsApp directo</dt><dd><a href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer">11 7358-1958 <span aria-hidden="true">↗</span></a></dd></div>
+            <div><dt>Instagram</dt><dd><a href="https://www.instagram.com/luquisound.ok/" target="_blank" rel="noopener noreferrer">@luquisound.ok <span aria-hidden="true">↗</span></a></dd></div>
+          </dl>
+        </div>
+      </aside>
     </div>
   </main>
 
@@ -38,27 +66,5 @@
     <a href="trabajos.html">Trabajos</a>
     <a class="nav-current nav-consult" href="contacto.html" aria-current="page">Contacto <span aria-hidden="true">↗</span></a>
   </nav>
-
-  <dialog class="contact-dialog" id="contact-dialog" aria-labelledby="consultation-title">
-    <div class="dialog-header"><span class="eyebrow">Luquisound / Hablemos</span><button class="dialog-close" type="button" data-close-dialog>Cerrar <span aria-hidden="true">×</span></button></div>
-    <h2 id="consultation-title">Tu auto.<br>Tu idea<span class="yellow-dot">.</span></h2>
-    <form id="consultation-form">
-      <label for="vehicle">¿Qué auto tenés?</label>
-      <input id="vehicle" name="vehicle" type="text" placeholder="Marca, modelo y año" maxlength="100" autocomplete="off" required>
-      <label for="interest">¿Qué te interesa?</label>
-      <select id="interest" name="interest"><option value="Audio">Audio</option><option value="Insonorización">Insonorización</option><option value="Personalización">Personalización</option><option value="Asesoramiento">Todavía no lo sé</option></select>
-      <label for="idea">Contanos tu idea</label>
-      <textarea id="idea" name="idea" placeholder="Qué te gustaría mejorar" rows="3" maxlength="600" required></textarea>
-      <button class="button button-yellow" type="submit">Ver mi consulta <span aria-hidden="true">↗</span></button>
-      <p class="form-note">Vista previa. No se envía ningún mensaje.</p>
-    </form>
-    <section class="consultation-preview" id="consultation-preview" aria-labelledby="preview-title" hidden>
-      <h3 id="preview-title">Así quedaría tu mensaje</h3>
-      <textarea id="preview-message" aria-label="Vista previa del mensaje" readonly rows="6"></textarea>
-      <div class="preview-actions"><a class="button button-yellow" id="whatsapp-consultation" href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer" aria-describedby="whatsapp-note">Continuar en WhatsApp <span aria-hidden="true">↗</span></a><button class="text-link" id="copy-consultation" type="button">Copiar mensaje</button><button class="text-link" id="edit-consultation" type="button">Editar</button></div>
-      <p class="form-note" id="whatsapp-note">Se abre WhatsApp con el texto preparado. Vos confirmás el envío desde el chat.</p>
-      <p class="form-note" id="copy-status" role="status">Revisá tu consulta. El mensaje se envía cuando lo confirmás en WhatsApp.</p>
-    </section>
-  </dialog>
 </body>
 </html>

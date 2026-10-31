@@ -7,7 +7,6 @@ const video = document.getElementById("hero-video");
 const hero = document.querySelector(".hero");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const serviceDialog = document.getElementById("service-dialog");
-const contactDialog = document.getElementById("contact-dialog");
 const consultationForm = document.getElementById("consultation-form");
 const preview = document.getElementById("consultation-preview");
 const previewMessage = document.getElementById("preview-message");
@@ -193,28 +192,41 @@ if (serviceDialog) {
   restoreService();
 }
 
-function showConsultation(interest, opener) {
-  if (!contactDialog || typeof contactDialog.showModal !== "function") return false;
-  if (interest) document.getElementById("interest").value = interest;
-  consultationForm.hidden = false;
-  preview.hidden = true;
-  previewMessage.value = "";
-  whatsappConsultation.href = whatsappBaseUrl;
-  copyStatus.textContent = consultationReadyStatus;
-  return openDialog(contactDialog, opener);
-}
-
-document.querySelectorAll("[data-open-contact]").forEach((element) => {
-  element.addEventListener("click", (event) => {
-    if (showConsultation(element.dataset.interest, element)) event.preventDefault();
-    setMenu(false);
-  });
-});
 if (consultationForm) {
   const selectedInterest = new URLSearchParams(location.search).get("interes");
   const interestField = document.getElementById("interest");
   const requiredFields = [document.getElementById("vehicle"), document.getElementById("idea")];
-  if ([...interestField.options].some(option => option.value === selectedInterest)) interestField.value = selectedInterest;
+  const hasSelectedInterest = [...interestField.options].some(option => option.value === selectedInterest);
+  if (hasSelectedInterest) interestField.value = selectedInterest;
+  const contactShell = consultationForm.closest(".contact-shell");
+  const floatingNavigation = document.querySelector(".floating-nav");
+  let consultationFocusFrame = 0;
+  function keepConsultationFocusVisible(element) {
+    cancelAnimationFrame(consultationFocusFrame);
+    if (!element?.matches("input, select, textarea, button, a") || !contactShell.contains(element)) return;
+    consultationFocusFrame = requestAnimationFrame(() => {
+      if (document.activeElement !== element || !element.isConnected) return;
+      const rect = element.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const viewportTop = window.visualViewport?.offsetTop ?? 0;
+      const viewportBottom = viewportTop + (window.visualViewport?.height ?? window.innerHeight);
+      const navigationRect = floatingNavigation?.getBoundingClientRect();
+      const navigationVisible = navigationRect && navigationRect.bottom > viewportTop && navigationRect.top < viewportBottom;
+      const safeTop = viewportTop + 24;
+      const safeBottom = navigationVisible ? Math.min(viewportBottom - 24, navigationRect.top - 16) : viewportBottom - 24;
+      if (rect.top >= safeTop && rect.bottom <= safeBottom) return;
+      const desiredTop = safeTop + Math.max(0, (safeBottom - safeTop - rect.height) / 2);
+      window.scrollBy({ top: rect.top - desiredTop, behavior: reducedMotion.matches ? "auto" : "smooth" });
+    });
+  }
+  contactShell.addEventListener("focusin", event => keepConsultationFocusVisible(event.target));
+  const restoreContactFocusVisibility = () => keepConsultationFocusVisible(document.activeElement);
+  window.addEventListener("resize", restoreContactFocusVisibility);
+  window.visualViewport?.addEventListener("resize", restoreContactFocusVisibility);
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted || !hasSelectedInterest) return;
+    document.getElementById("vehicle").focus({ preventScroll: true });
+  });
   requiredFields.forEach(field => field.addEventListener("input", () => field.setCustomValidity("")));
   consultationForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -253,6 +265,7 @@ if (consultationForm) {
       copyStatus.textContent = "Seleccionamos el mensaje para que puedas copiarlo. No se envió ninguna consulta.";
     }
   });
+  document.getElementById("consultation-fields").disabled = false;
 }
 
 document.querySelectorAll("[data-app-only]").forEach(element => { element.hidden = false; });

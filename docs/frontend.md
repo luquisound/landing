@@ -62,7 +62,10 @@ Documentary originals, local prototypes and private provenance stay outside
 the public file list. Prepared video files contain no audio. The vertical
 workshop derivative retains its sequence, with visible personal plates masked
 in three shots. Contact details include the workshop location, opening hours
-and a direct WhatsApp link. The consultation prepares a message locally and
+and a direct WhatsApp link. Contact presents the consultation inline, followed
+by compact workshop details and alternative channels on smaller screens; wider
+screens use two columns. Valid service-interest links focus the vehicle field.
+The consultation prepares a message locally and
 lets the visitor review, edit, copy or open it in WhatsApp. The visitor sends
 the message from the chat; there is no backend or automatic message delivery.
 Repository delivery does not deploy the website.
