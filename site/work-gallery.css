@@ -17,7 +17,8 @@
 .work-gallery-page .card-square { aspect-ratio: 1 / 1; }
 .work-gallery-page .card-landscape { aspect-ratio: 4 / 3; }
 .work-gallery-page .card-stars img { object-position: 50% 40%; }
-.work-gallery-page .card-mustang img { object-position: 50% 60%; }
+.work-gallery-page .card-mustang { aspect-ratio: 3 / 2; }
+.work-gallery-page .card-mustang img { object-fit: contain; }
 .work-gallery-page .card-silverado img { object-position: 50% 55%; }
 .work-gallery-page .card-shade { position: absolute; inset: 40% 0 0; background: linear-gradient(transparent 30%, rgb(0 0 0 / .72)); pointer-events: none; }
 .work-gallery-page .card-caption { display: flex; position: absolute; bottom: 0; left: 0; right: 0; align-items: center; gap: 16px; padding: 20px 24px; color: var(--white); font-size: .875rem; line-height: 1.4; }
