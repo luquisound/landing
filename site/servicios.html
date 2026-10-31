@@ -105,12 +105,13 @@
         </details>
       </section>
       <div class="gallery-image-wrap service-media">
-        <img id="service-dialog-image" src="assets/soundproofing.jpg" alt="Detalle de una puerta con material de insonorización" width="1013" height="1800">
-        <figure id="service-dialog-evidence" hidden>
-          <video id="service-dialog-video" controls playsinline muted preload="none" aria-describedby="service-dialog-caption"></video>
-          <figcaption id="service-dialog-caption"></figcaption>
+        <figure id="service-dialog-evidence">
+          <img id="service-dialog-image" src="assets/soundproofing.jpg" alt="Detalle de una puerta con material de insonorización" aria-describedby="service-dialog-caption" width="1013" height="1800">
+          <video id="service-dialog-video" controls playsinline muted preload="none" aria-describedby="service-dialog-caption" hidden></video>
+          <figcaption id="service-dialog-caption" hidden></figcaption>
         </figure>
-        <div class="service-clip-picker" id="service-dialog-clips" aria-label="Elegir un trabajo para ver" hidden></div>
+        <div class="service-clip-picker" id="service-dialog-clips" role="group" aria-label="Elegir un trabajo para ver" hidden></div>
+        <div class="service-clip-picker service-photo-picker" id="service-dialog-media" role="group" aria-label="Elegir foto del trabajo" hidden></div>
       </div>
       <div class="gallery-information">
         <p id="service-dialog-examples" hidden></p>

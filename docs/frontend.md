@@ -28,9 +28,12 @@ Services retain three pillars and link to related work.
 Soundproofing explains benefits and treatment levels for doors, floors and
 roofs in native disclosure controls, with selected diagrams and HTML text.
 Door levels add treated surfaces; floor and roof levels add material layers.
-The existing BMW and Corsa media remain examples of door work.
-Work contains eight case collections, ten manually played clips and eight
-existing photographs.
+Selected Mustang and Silverado photographs show soundproofing processes,
+followed by the existing BMW and Corsa door-work clips. Service evidence
+supports both photographs and manually played videos.
+Work opens with the Mustang and Silverado soundproofing cases, followed by
+the eight existing case collections, ten manually played clips and eight
+standalone photographs.
 Cases can belong to multiple filters. Case links, filters and columns restore
 through browser history. Video sources are released when their dialog closes
 or the selected media changes.
@@ -42,6 +45,9 @@ or the selected media changes.
   reduced motion and poster fallback.
 - Check service links, case filters, direct case URLs, browser history,
   keyboard navigation, manual playback and media release.
+- Check the consultation preview, repeated edits, service preselection,
+  WhatsApp message encoding, clipboard fallback and direct no-JavaScript link.
+  Inspect or intercept the WhatsApp URL during testing; do not send a message.
 - Check that only selected website files and prepared media enter the index.
 - Confirm both local fonts load and check long expanded headings, navigation,
   cards and dialogs across viewport sizes. Check SVG proportions and favicon.
@@ -50,5 +56,7 @@ Documentary originals, local prototypes and private provenance stay outside
 the public file list. Prepared video files contain no audio. The vertical
 workshop derivative retains its sequence, with visible personal plates masked
 in three shots. Contact details include the workshop location, opening hours
-and a direct WhatsApp link. The consultation remains a local preview/copy
-flow. Repository delivery does not deploy the website.
+and a direct WhatsApp link. The consultation prepares a message locally and
+lets the visitor review, edit, copy or open it in WhatsApp. The visitor sends
+the message from the chat; there is no backend or automatic message delivery.
+Repository delivery does not deploy the website.

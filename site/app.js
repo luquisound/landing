@@ -12,6 +12,9 @@ const consultationForm = document.getElementById("consultation-form");
 const preview = document.getElementById("consultation-preview");
 const previewMessage = document.getElementById("preview-message");
 const copyStatus = document.getElementById("copy-status");
+const whatsappConsultation = document.getElementById("whatsapp-consultation");
+const whatsappBaseUrl = whatsappConsultation?.href;
+const consultationReadyStatus = "Revisá tu consulta. El mensaje se envía cuando lo confirmás en WhatsApp.";
 const desktopNavigation = window.matchMedia("(min-width: 1000px)");
 const dialogOpeners = new WeakMap();
 let heroSource = "";
@@ -187,7 +190,9 @@ function showConsultation(interest, opener) {
   if (interest) document.getElementById("interest").value = interest;
   consultationForm.hidden = false;
   preview.hidden = true;
-  copyStatus.textContent = "Tu consulta está lista para revisar. No se envió ningún mensaje.";
+  previewMessage.value = "";
+  whatsappConsultation.href = whatsappBaseUrl;
+  copyStatus.textContent = consultationReadyStatus;
   return openDialog(contactDialog, opener);
 }
 
@@ -212,21 +217,29 @@ if (consultationForm) {
     const interest = String(data.get("interest"));
     const idea = String(data.get("idea")).trim();
     previewMessage.value = `Hola Luquisound. Tengo un ${vehicle}.\n\nMe interesa: ${interest}.\n\nMi idea: ${idea}`;
+    whatsappConsultation.href = whatsappBaseUrl + "?text=" + encodeURIComponent(previewMessage.value);
+    copyStatus.textContent = consultationReadyStatus;
     consultationForm.hidden = true;
     preview.hidden = false;
-    document.getElementById("copy-consultation").focus();
+    whatsappConsultation.focus();
   });
   document.getElementById("edit-consultation").addEventListener("click", () => {
     preview.hidden = true;
     consultationForm.hidden = false;
+    previewMessage.value = "";
+    whatsappConsultation.href = whatsappBaseUrl;
+    copyStatus.textContent = consultationReadyStatus;
     document.getElementById("vehicle").focus();
   });
   document.getElementById("copy-consultation").addEventListener("click", async () => {
+    const message = previewMessage.value;
     try {
       if (!navigator.clipboard) throw new Error("Clipboard unavailable");
-      await navigator.clipboard.writeText(previewMessage.value);
+      await navigator.clipboard.writeText(message);
+      if (preview.hidden || previewMessage.value !== message) return;
       copyStatus.textContent = "Mensaje copiado. No se envió ninguna consulta.";
     } catch {
+      if (preview.hidden || previewMessage.value !== message) return;
       previewMessage.focus();
       previewMessage.select();
       copyStatus.textContent = "Seleccionamos el mensaje para que puedas copiarlo. No se envió ninguna consulta.";

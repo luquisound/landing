@@ -27,7 +27,7 @@
       </dl>
       <div class="contact-action">
         <button class="button button-yellow" type="button" data-open-contact data-app-only hidden aria-haspopup="dialog">Contanos tu idea <span aria-hidden="true">↗</span></button>
-        <noscript><p class="form-note">La consulta interactiva requiere JavaScript.</p></noscript>
+        <noscript><p class="form-note">Podés <a class="text-link" href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer">consultarnos directamente por WhatsApp</a> con tu vehículo y lo que querés mejorar.</p></noscript>
       </div>
     </div>
   </main>
@@ -55,8 +55,9 @@
     <section class="consultation-preview" id="consultation-preview" aria-labelledby="preview-title" hidden>
       <h3 id="preview-title">Así quedaría tu mensaje</h3>
       <textarea id="preview-message" aria-label="Vista previa del mensaje" readonly rows="6"></textarea>
-      <div class="preview-actions"><button class="button button-yellow" id="copy-consultation" type="button">Copiar mensaje</button><button class="text-link" id="edit-consultation" type="button">Editar</button></div>
-      <p class="form-note" id="copy-status" role="status">Tu consulta está lista para revisar. No se envió ningún mensaje.</p>
+      <div class="preview-actions"><a class="button button-yellow" id="whatsapp-consultation" href="https://wa.me/5491173581958" target="_blank" rel="noopener noreferrer" aria-describedby="whatsapp-note">Continuar en WhatsApp <span aria-hidden="true">↗</span></a><button class="text-link" id="copy-consultation" type="button">Copiar mensaje</button><button class="text-link" id="edit-consultation" type="button">Editar</button></div>
+      <p class="form-note" id="whatsapp-note">Se abre WhatsApp con el texto preparado. Vos confirmás el envío desde el chat.</p>
+      <p class="form-note" id="copy-status" role="status">Revisá tu consulta. El mensaje se envía cuando lo confirmás en WhatsApp.</p>
     </section>
   </dialog>
 </body>

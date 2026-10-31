@@ -137,11 +137,19 @@
   function buildMediaSelector() {
     mediaSelector.replaceChildren();
     mediaSelector.hidden = activeMedia.length < 2;
+    const photoCount = activeMedia.filter(media => media.type === "image").length;
+    let photoIndex = 0;
     activeMedia.forEach((media, index) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = media.type === "video" ? (index > 1 ? media.title : "Ver video") : "Ver foto";
-      button.setAttribute("aria-label", `${media.type === "video" ? "Ver video" : "Ver foto"}: ${media.title}`);
+      if (media.type === "video") {
+        button.textContent = index > 1 ? media.title : "Ver video";
+        button.setAttribute("aria-label", `Ver video: ${media.title}`);
+      } else {
+        photoIndex += 1;
+        button.textContent = photoCount > 1 ? `Foto ${photoIndex}` : "Ver foto";
+        button.setAttribute("aria-label", `Ver foto ${photoIndex} de ${photoCount}: ${media.title}`);
+      }
       button.setAttribute("aria-pressed", "false");
       button.addEventListener("click", () => showMedia(index));
       mediaSelector.append(button);
@@ -213,6 +221,9 @@
     if (!visible.length) return;
     const index = (visible.indexOf(activeCard) + direction + visible.length) % visible.length;
     selectProject(visible[index]);
+    if (!dialog.contains(document.activeElement)) {
+      (direction < 0 ? previous : next).focus({ preventScroll: true });
+    }
   }
 
   cards.forEach(card => {

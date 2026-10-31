@@ -9,7 +9,7 @@
       title: "Insonorización",
       description: "Tratamientos en puertas, piso y techo que ayudan a reducir ruidos y vibraciones para viajar en un habitáculo más confortable.",
       topics: [],
-      caseIds: ["bmw-335i", "chevrolet-corsa"]
+      caseIds: ["ford-mustang-insonorizacion", "chevrolet-silverado-insonorizacion", "bmw-335i", "chevrolet-corsa"]
     },
     audio: {
       title: "Audio",
@@ -39,6 +39,7 @@
   const evidence = document.getElementById("service-dialog-evidence");
   const caption = document.getElementById("service-dialog-caption");
   const picker = document.getElementById("service-dialog-clips");
+  const mediaPicker = document.getElementById("service-dialog-media");
   const topics = document.getElementById("service-dialog-topics");
   const soundproofing = document.getElementById("service-dialog-soundproofing");
   const related = document.getElementById("service-dialog-related");
@@ -49,21 +50,46 @@
     video.removeAttribute("src");
     video.removeAttribute("poster");
     video.load();
+    video.hidden = true;
   }
 
-  function selectClip(work, media, button) {
+  function selectMedia(work, media, button) {
     releaseVideo();
-    image.hidden = true;
     evidence.hidden = false;
-    video.src = media.src;
-    if (media.poster) video.poster = media.poster;
-    video.setAttribute("aria-label", "Video del trabajo " + work.title);
+    image.hidden = media.type === "video";
+    if (media.type === "video") {
+      video.src = media.src;
+      if (media.poster) video.poster = media.poster;
+      video.setAttribute("aria-label", media.alt || "Video del trabajo " + work.title);
+      video.hidden = false;
+    } else {
+      image.src = media.src;
+      image.alt = media.alt;
+    }
     const title = document.createElement("strong");
     title.textContent = work.title;
     const description = document.createElement("span");
     description.textContent = media.title || work.summary;
     caption.replaceChildren(title, description);
+    caption.hidden = false;
+    mediaPicker.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  }
+
+  function selectWork(work, media, button) {
     picker.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+    mediaPicker.replaceChildren();
+    mediaPicker.hidden = media.length < 2;
+    media.forEach((item, index) => {
+      const choice = document.createElement("button");
+      const label = item.type === "video" ? "Video" : "Foto";
+      choice.type = "button";
+      choice.textContent = `${label} ${index + 1}`;
+      choice.setAttribute("aria-label", `Ver ${label.toLowerCase()} ${index + 1} de ${media.length}: ${item.title || work.title}`);
+      choice.setAttribute("aria-pressed", String(index === 0));
+      choice.addEventListener("click", () => selectMedia(work, item, choice));
+      mediaPicker.append(choice);
+      if (index === 0) selectMedia(work, item, choice);
+    });
   }
 
   function prepare(card) {
@@ -74,10 +100,13 @@
     soundproofing.hidden = id !== "insonorizacion";
     soundproofing.querySelectorAll("details").forEach(item => { item.open = false; });
     topics.hidden = service.topics.length === 0;
-    related.querySelector("h3").textContent = id === "insonorizacion" ? "Trabajos en puertas" : "Trabajos relacionados";
+    related.querySelector("h3").textContent = id === "insonorizacion" ? "Trabajos de insonorización" : "Trabajos relacionados";
     releaseVideo();
     image.hidden = false;
-    evidence.hidden = true;
+    evidence.hidden = false;
+    caption.hidden = true;
+    mediaPicker.replaceChildren();
+    mediaPicker.hidden = true;
     const cardImage = card.querySelector("img");
     image.src = cardImage.getAttribute("src");
     image.alt = cardImage.alt;
@@ -120,20 +149,21 @@
     allWork.append(arrow);
 
     picker.replaceChildren();
-    const clips = works.map(work => {
+    const examples = works.map(work => {
       const videos = work.media.filter(item => item.type === "video");
-      return { work, media: videos.find(item => item.src === service.clipByCase?.[work.id]) || videos[0] };
-    }).filter(item => item.media);
-    clips.forEach(({ work, media }, index) => {
+      const clip = videos.find(item => item.src === service.clipByCase?.[work.id]) || videos[0];
+      return { work, media: clip ? [clip] : work.media.filter(item => item.type === "image") };
+    }).filter(item => item.media.length);
+    examples.forEach(({ work, media }, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = work.title;
       button.setAttribute("aria-pressed", String(index === 0));
-      button.addEventListener("click", () => selectClip(work, media, button));
+      button.addEventListener("click", () => selectWork(work, media, button));
       picker.append(button);
-      if (index === 0) selectClip(work, media, button);
+      if (index === 0) selectWork(work, media, button);
     });
-    picker.hidden = clips.length < 2;
+    picker.hidden = examples.length < 2;
     return { name: service.title, title: service.title, cta };
   }
 

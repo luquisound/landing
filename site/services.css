@@ -10,7 +10,7 @@
   line-height: 1.2;
 }
 .service-media { padding: var(--space-3); }
-.service-media > img,
+#service-dialog-image,
 #service-dialog-video {
   width: 100%;
   height: min(58dvh, 620px);
@@ -48,6 +48,7 @@
   color: var(--yellow);
 }
 .service-clip-picker button:hover { border-color: var(--yellow); }
+.service-photo-picker { margin-top: var(--space-2); }
 .service-topics {
   padding: 0;
   margin: var(--space-3) 0 0;
