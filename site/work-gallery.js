@@ -130,6 +130,7 @@
     carousel.clear();
     releaseVideo();
     delete mediaStage.dataset.mediaType;
+    delete mediaStage.dataset.photoCrop;
     mediaTitle.textContent = "";
   }
 
@@ -179,6 +180,7 @@
       : "contacto.html";
     const media = project?.media || [{ type: "image", src: sourceImage.getAttribute("src"), alt: sourceImage.alt, title: title.textContent }];
     dialog.classList.toggle("has-case", Boolean(project));
+    if (card.dataset.photoCrop) mediaStage.dataset.photoCrop = card.dataset.photoCrop;
     carousel.setItems(media);
     updateCounter();
     if (updateUrl) updateWorkUrl();
