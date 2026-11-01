@@ -358,7 +358,6 @@ function openService(card, updateHistory = true) {
     dialogImage.alt = image.alt;
     document.getElementById("service-dialog-title").textContent = name;
     document.getElementById("service-dialog-description").textContent = "Conocé los detalles de este servicio y consultanos por tu vehículo.";
-    document.getElementById("service-dialog-examples").hidden = true;
     document.getElementById("service-dialog-cta").href = "contacto.html?interes=" + encodeURIComponent(name);
   }
   const url = new URL(location.href);

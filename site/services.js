@@ -140,7 +140,6 @@
     const cardImage = card.querySelector("img");
     document.getElementById("service-dialog-title").textContent = service.title;
     document.getElementById("service-dialog-description").textContent = service.description;
-    document.getElementById("service-dialog-examples").hidden = true;
     const cta = "contacto.html?interes=" + encodeURIComponent(service.title);
     document.getElementById("service-dialog-cta").href = cta;
 

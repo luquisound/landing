@@ -118,7 +118,7 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 .media-carousel-controls .media-carousel-retry { width: auto; padding-inline: 12px; font-size: .875rem; }
 .gallery-information { padding: var(--space-3); }
 .gallery-information h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.2; }
-#service-dialog-description, #service-dialog-examples { color: var(--muted); margin-top: var(--space-2); font-size: 1rem; line-height: 1.6; }
+#service-dialog-description { color: var(--muted); margin-top: var(--space-2); font-size: 1rem; line-height: 1.6; }
 .service-dialog-cta { align-self: flex-start; margin-top: var(--space-4); }
 .form-note { font-size: .875rem; line-height: 1.5; color: var(--muted); margin-top: 16px; }
 .page-shell { width: min(100%, var(--content-max)); margin-inline: auto; min-height: 100svh; padding: var(--page-top) var(--page-right) max(40px, env(safe-area-inset-bottom)) var(--page-left); }
