@@ -8,12 +8,6 @@ const hero = document.querySelector(".hero");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const serviceDialog = document.getElementById("service-dialog");
 const consultationForm = document.getElementById("consultation-form");
-const preview = document.getElementById("consultation-preview");
-const previewMessage = document.getElementById("preview-message");
-const copyStatus = document.getElementById("copy-status");
-const whatsappConsultation = document.getElementById("whatsapp-consultation");
-const whatsappBaseUrl = whatsappConsultation?.href;
-const consultationReadyStatus = "Revisá tu consulta. El mensaje se envía cuando lo confirmás en WhatsApp.";
 const desktopNavigation = window.matchMedia("(min-width: 1000px)");
 const dialogOpeners = new WeakMap();
 let heroSource = "";
@@ -413,7 +407,8 @@ if (serviceDialog) {
 if (consultationForm) {
   const selectedInterest = new URLSearchParams(location.search).get("interes");
   const interestField = document.getElementById("interest");
-  const requiredFields = [document.getElementById("vehicle"), document.getElementById("idea")];
+  const vehicleField = document.getElementById("vehicle");
+  const whatsappBaseUrl = "https://wa.me/5491173581958";
   const hasSelectedInterest = [...interestField.options].some(option => option.value === selectedInterest);
   if (hasSelectedInterest) interestField.value = selectedInterest;
   const contactShell = consultationForm.closest(".contact-shell");
@@ -443,45 +438,20 @@ if (consultationForm) {
   window.visualViewport?.addEventListener("resize", restoreContactFocusVisibility);
   window.addEventListener("pageshow", (event) => {
     if (event.persisted || !hasSelectedInterest) return;
-    document.getElementById("vehicle").focus({ preventScroll: true });
+    vehicleField.focus({ preventScroll: true });
   });
-  requiredFields.forEach(field => field.addEventListener("input", () => field.setCustomValidity("")));
+  vehicleField.addEventListener("input", () => vehicleField.setCustomValidity(""));
   consultationForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    requiredFields.forEach(field => field.setCustomValidity(field.value.trim() ? "" : "Completá este campo."));
+    vehicleField.setCustomValidity(vehicleField.value.trim() ? "" : "Completá este campo.");
     if (!consultationForm.reportValidity()) return;
     const data = new FormData(consultationForm);
     const vehicle = String(data.get("vehicle")).trim();
+    const year = String(data.get("year")).trim();
     const interest = String(data.get("interest"));
     const idea = String(data.get("idea")).trim();
-    previewMessage.value = `Hola Luquisound. Tengo un ${vehicle}.\n\nMe interesa: ${interest}.\n\nMi idea: ${idea}`;
-    whatsappConsultation.href = whatsappBaseUrl + "?text=" + encodeURIComponent(previewMessage.value);
-    copyStatus.textContent = consultationReadyStatus;
-    consultationForm.hidden = true;
-    preview.hidden = false;
-    whatsappConsultation.focus();
-  });
-  document.getElementById("edit-consultation").addEventListener("click", () => {
-    preview.hidden = true;
-    consultationForm.hidden = false;
-    previewMessage.value = "";
-    whatsappConsultation.href = whatsappBaseUrl;
-    copyStatus.textContent = consultationReadyStatus;
-    document.getElementById("vehicle").focus();
-  });
-  document.getElementById("copy-consultation").addEventListener("click", async () => {
-    const message = previewMessage.value;
-    try {
-      if (!navigator.clipboard) throw new Error("Clipboard unavailable");
-      await navigator.clipboard.writeText(message);
-      if (preview.hidden || previewMessage.value !== message) return;
-      copyStatus.textContent = "Mensaje copiado. No se envió ninguna consulta.";
-    } catch {
-      if (preview.hidden || previewMessage.value !== message) return;
-      previewMessage.focus();
-      previewMessage.select();
-      copyStatus.textContent = "Seleccionamos el mensaje para que puedas copiarlo. No se envió ninguna consulta.";
-    }
+    const message = `Hola Luquisound. Tengo un ${vehicle}${year ? ` ${year}` : ""}.\n\nMe interesa: ${interest}.` + (idea ? `\n\nMi idea: ${idea}` : "");
+    window.open(whatsappBaseUrl + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
   });
   document.getElementById("consultation-fields").disabled = false;
 }

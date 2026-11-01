@@ -20,66 +20,98 @@ const test = base.extend({
   }, { auto: true }],
 });
 
-test('consultation validates input, encodes the message and preserves edits', async ({ page }) => {
-  await page.goto('/contacto.html?interes=Insonorizaci%C3%B3n');
-  const vehicle = page.getByLabel('¿Qué auto tenés?');
-  const idea = page.getByLabel('Contanos tu idea');
-  const review = page.getByRole('button', { name: 'Revisar consulta' });
-  await expect(page.getByLabel('¿Qué te interesa?')).toHaveValue('Insonorización');
-  await expect(vehicle).toBeFocused();
+async function interceptWhatsApp(context) {
+  const destinations = [];
+  await context.route('https://wa.me/**', async route => {
+    destinations.push(new URL(route.request().url()));
+    await route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Intercepted consultation</p>' });
+  });
+  return destinations;
+}
 
-  await review.click();
-  await expect(vehicle).toBeFocused();
-  await expect(page.getByRole('heading', { name: 'Revisá tu consulta' })).toBeHidden();
-  await vehicle.fill('   ');
-  await idea.fill('   ');
-  await review.click();
-  await expect(vehicle).toBeFocused();
-  await expect(vehicle).toHaveJSProperty('validationMessage', 'Completá este campo.');
-
-  const vehicleText = '  Golf 2015 & GTI  ';
-  const ideaText = '  Mejorar audio + vibraciones. ¿Qué recomendás? #consulta  ';
-  await vehicle.fill(vehicleText);
-  await idea.fill(ideaText);
-  await review.click();
-
-  const message = `Hola Luquisound. Tengo un ${vehicleText.trim()}.\n\nMe interesa: Insonorización.\n\nMi idea: ${ideaText.trim()}`;
-  await expect(page.getByLabel('Vista previa del mensaje')).toHaveValue(message);
-  const whatsapp = page.getByRole('link', { name: 'Continuar en WhatsApp' });
-  const destination = new URL(await whatsapp.getAttribute('href'));
+async function expectWhatsApp(context, destinations, action, message) {
+  const previousCount = destinations.length;
+  const popupPromise = context.waitForEvent('page');
+  await action();
+  const popup = await popupPromise;
+  await expect.poll(() => destinations.length).toBe(previousCount + 1);
+  const destination = destinations.at(-1);
   expect(destination.origin).toBe('https://wa.me');
   expect(destination.pathname).toBe('/5491173581958');
   expect(destination.searchParams.get('text')).toBe(message);
-  await expect(whatsapp).toBeFocused();
+  await popup.close();
+}
 
-  await page.getByRole('button', { name: 'Editar', exact: true }).click();
-  await expect(vehicle).toHaveValue(vehicleText);
-  await expect(idea).toHaveValue(ideaText);
+test('consultation validates input and opens WhatsApp with an encoded message', async ({ context, page }) => {
+  const destinations = await interceptWhatsApp(context);
+  await page.goto('/contacto.html?interes=Insonorizaci%C3%B3n');
+  const vehicle = page.getByLabel('¿Qué auto tenés?');
+  const year = page.getByLabel('Año (opcional)', { exact: true });
+  const idea = page.getByLabel('Contanos tu idea (opcional)', { exact: true });
+  const consult = page.getByRole('button', { name: 'Consultar por WhatsApp' });
+  await expect(page.getByLabel('¿Qué te interesa?')).toHaveValue('Insonorización');
   await expect(vehicle).toBeFocused();
-  await idea.fill('Agregar un subwoofer & conservar el baúl.');
-  await review.click();
-  await expect(page.getByLabel('Vista previa del mensaje')).toHaveValue(/Agregar un subwoofer & conservar el baúl\.$/);
+
+  await consult.click();
+  await expect(vehicle).toBeFocused();
+  await vehicle.fill('   ');
+  await consult.click();
+  await expect(vehicle).toBeFocused();
+  await expect(vehicle).toHaveJSProperty('validationMessage', 'Completá este campo.');
+
+  const vehicleText = '  Volkswagen Golf & GTI  ';
+  const ideaText = '  Mejorar audio + vibraciones. ¿Qué recomendás? #consulta  ';
+  await vehicle.fill(vehicleText);
+  for (const invalidYear of ['20', '20a4']) {
+    await year.fill(invalidYear);
+    await consult.click();
+    await expect(year).toBeFocused();
+    expect(await year.evaluate(element => element.validity.patternMismatch)).toBe(true);
+  }
+  expect(destinations).toEqual([]);
+
+  await year.fill('2015');
+  await idea.fill(ideaText);
+  const message = `Hola Luquisound. Tengo un ${vehicleText.trim()} 2015.\n\nMe interesa: Insonorización.\n\nMi idea: ${ideaText.trim()}`;
+  await expectWhatsApp(context, destinations, () => consult.click(), message);
+
+  await expect(page.locator('#consultation-form')).toBeVisible();
+  await expect(vehicle).toHaveValue(vehicleText);
+  await expect(year).toHaveValue('2015');
+  await expect(idea).toHaveValue(ideaText);
 });
 
-test('copy fallback selects the message without accessing the clipboard', async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
-  });
+test('consultation accepts optional fields and uses current values on keyboard resubmission', async ({ context, page }) => {
+  const destinations = await interceptWhatsApp(context);
   await page.goto('/contacto.html');
-  await page.getByLabel('¿Qué auto tenés?').fill('Corsa 2010');
-  await page.getByLabel('Contanos tu idea').fill('Consultar por insonorización.');
-  await page.getByRole('button', { name: 'Revisar consulta' }).click();
-  await page.getByRole('button', { name: 'Copiar mensaje' }).click();
-  const message = page.getByLabel('Vista previa del mensaje');
-  await expect(message).toBeFocused();
-  await expect(page.getByRole('status')).toHaveText('Seleccionamos el mensaje para que puedas copiarlo. No se envió ninguna consulta.');
-  const selection = await message.evaluate(element => ({
-    start: element.selectionStart,
-    end: element.selectionEnd,
-    length: element.value.length,
-  }));
-  expect(selection.start).toBe(0);
-  expect(selection.end).toBe(selection.length);
+  const vehicle = page.getByLabel('¿Qué auto tenés?');
+  const year = page.getByLabel('Año (opcional)', { exact: true });
+  const idea = page.getByLabel('Contanos tu idea (opcional)', { exact: true });
+  await vehicle.fill('Chevrolet Corsa');
+  await expectWhatsApp(context, destinations, () => vehicle.press('Enter'),
+    'Hola Luquisound. Tengo un Chevrolet Corsa.\n\nMe interesa: Audio.');
+
+  await vehicle.fill('Volkswagen Golf');
+  await year.fill('2020');
+  await idea.fill('   ');
+  await page.getByLabel('¿Qué te interesa?').selectOption('Personalización');
+  await expectWhatsApp(context, destinations, () => year.press('Enter'),
+    'Hola Luquisound. Tengo un Volkswagen Golf 2020.\n\nMe interesa: Personalización.');
+  await expect(page.locator('#consultation-form')).toBeVisible();
+  await expect(vehicle).toHaveValue('Volkswagen Golf');
+  await expect(idea).toHaveValue('   ');
+});
+
+test.describe('contact without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('provides a direct WhatsApp alternative', async ({ page }) => {
+    await page.goto('/contacto.html');
+    await expect(page.getByRole('button', { name: 'Consultar por WhatsApp' })).toBeHidden();
+    await expect(page.getByLabel('¿Qué auto tenés?')).toBeDisabled();
+    await expect(page.getByRole('link', { name: 'consultarnos directamente por WhatsApp' }))
+      .toHaveAttribute('href', 'https://wa.me/5491173581958');
+  });
 });
 
 test('service dialogs restore history and focus, then preselect the consultation', async ({ page }) => {
