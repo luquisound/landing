@@ -94,6 +94,9 @@ in three shots. Contact details include the workshop location, opening hours
 and a direct WhatsApp link. Contact presents the consultation inline, followed
 by compact workshop details and alternative channels on smaller screens; wider
 screens use two columns. Valid service-interest links focus the vehicle field.
+On Contact at widths up to 699px, navigation follows the page content in normal
+flow so it cannot cover the consultation button. Other pages and wider Contact
+viewports retain floating navigation.
 The consultation keeps make/model and a required four-digit year in one row.
 The accepted years range from 1900 through the current calendar year.
 The idea is optional; empty ideas are omitted from the message. Submitting

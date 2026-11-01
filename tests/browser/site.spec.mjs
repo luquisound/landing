@@ -115,6 +115,61 @@ test('consultation accepts year boundaries and optional ideas on keyboard resubm
   await expect(idea).toHaveValue('   ');
 });
 
+test('mobile contact keeps the consultation clear while scrolling and navigation reachable at the end', async ({ page }) => {
+  for (const height of [780, 480]) {
+    await page.setViewportSize({ width: 360, height });
+    await page.goto('/contacto.html');
+    await page.evaluate(() => document.fonts.ready);
+    let visibleChecks = 0;
+    for (const top of [0, 120, 240, 360, 480, 600]) {
+      await page.evaluate(top => window.scrollTo({ top, behavior: 'instant' }), top);
+      const accessibility = await page.evaluate(() => {
+        const button = document.getElementById('whatsapp-consultation');
+        const buttonRect = button.getBoundingClientRect();
+        const navRect = document.querySelector('.floating-nav').getBoundingClientRect();
+        const visible = buttonRect.top >= 0 && buttonRect.bottom <= innerHeight;
+        const overlap = buttonRect.left < navRect.right && buttonRect.right > navRect.left
+          && buttonRect.top < navRect.bottom && buttonRect.bottom > navRect.top;
+        return {
+          overlap,
+          visible,
+          receivesPointer: visible && button.contains(document.elementFromPoint(
+            buttonRect.left + buttonRect.width / 2, buttonRect.top + buttonRect.height / 2,
+          )),
+        };
+      });
+      expect(accessibility.overlap, `CTA overlap at 360x${height}, scroll ${top}`).toBe(false);
+      if (accessibility.visible) {
+        expect(accessibility.receivesPointer, `CTA pointer at 360x${height}, scroll ${top}`).toBe(true);
+        visibleChecks++;
+      }
+    }
+    expect(visibleChecks).toBeGreaterThan(0);
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    const navigation = page.getByRole('navigation', { name: 'Navegación principal' });
+    await expect(navigation).toBeInViewport({ ratio: 1 });
+    await expect(navigation.getByRole('link')).toHaveText(['Inicio', 'Servicios', 'Trabajos', /Contacto/]);
+  }
+});
+
+test('contact above the mobile breakpoint and other mobile pages retain floating navigation', async ({ page }) => {
+  for (const [route, width] of [
+    ['/contacto.html', 700], ['/contacto.html', 1280],
+    ['/servicios.html', 360], ['/trabajos.html', 360],
+  ]) {
+    await page.setViewportSize({ width, height: 780 });
+    await page.goto(route);
+    await page.evaluate(() => document.fonts.ready);
+    const navigation = page.getByRole('navigation', { name: 'Navegación principal' });
+    const before = await navigation.boundingBox();
+    await page.evaluate(() => window.scrollTo({ top: 220, behavior: 'instant' }));
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    const after = await navigation.boundingBox();
+    expect(after.y, `Navigation moved on ${route} at ${width}px`).toBeCloseTo(before.y, 1);
+    await expect(navigation).toBeInViewport({ ratio: 1 });
+  }
+});
+
 test.describe('contact without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 

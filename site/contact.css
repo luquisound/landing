@@ -26,6 +26,10 @@
 .contact-page .contact-channels > div { border-top: 1px solid var(--line); padding-block: 16px; }
 .contact-page .contact-channels dt { color: var(--muted); font-size: .875rem; }
 .contact-page .contact-channels dd { margin: 4px 0 0; }
+@media (max-width: 699px) {
+  .contact-page .contact-shell { padding-bottom: 32px; }
+  .contact-page .floating-nav { position: static; transform: none; margin: 0 auto max(24px, calc(env(safe-area-inset-bottom) + 16px)); }
+}
 @media (min-width: 900px) {
   .contact-page .contact-content { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(48px, 6vw, 80px); }
   .contact-page .contact-fields > .button { width: auto; min-width: 240px; }
