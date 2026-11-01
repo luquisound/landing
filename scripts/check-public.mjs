@@ -16,6 +16,18 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const gitBytes = (file, sizeLimit) => execFileSync('git', ['show', `:${file}`], {
   cwd: root, maxBuffer: sizeLimit + 1,
 });
+
+function checkSyntax(file, bytes, source = '') {
+  try {
+    if (['.mjs', '.js'].includes(path.extname(file))) {
+      execFileSync(process.execPath, ['--check', '--input-type=module'], { input: bytes, stdio: 'pipe' });
+    }
+    if (path.extname(file) === '.json') JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+  } catch {
+    errors.push(`${JSON.stringify(file)}${source}: invalid syntax`);
+  }
+}
+
 const indexed = git('ls-files', '--cached', '-z').split('\0').filter(Boolean);
 const visible = git('ls-files', '--others', '--exclude-standard', '-z').split('\0').filter(Boolean);
 const approved = new Set(files);
@@ -30,17 +42,17 @@ for (const file of files) {
     const sizeLimit = mediaFileSizeLimit(file) ?? 256 * 1024;
     const bytes = await readPublicBytes(target, sizeLimit);
     for (const issue of fileContentIssues(file, bytes)) errors.push(`${JSON.stringify(file)}: ${issue}`);
+    checkSyntax(file, bytes);
     // The index can differ from the working copy during a commit review.
     if (indexed.includes(file)) {
       const staged = gitBytes(file, sizeLimit);
       for (const issue of indexedContentIssues(file, staged, bytes)) errors.push(`${JSON.stringify(file)} (index): ${issue}`);
+      checkSyntax(file, staged, ' (index)');
       const entry = git('ls-files', '--stage', '--', file);
       if (!entry.startsWith('100644 ') && !entry.startsWith('100755 ')) {
         errors.push(`${JSON.stringify(file)}: index must contain a regular file`);
       }
     }
-    if (['.mjs', '.js'].includes(path.extname(file))) execFileSync(process.execPath, ['--check', target], { stdio: 'pipe' });
-    if (path.extname(file) === '.json') JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
   } catch {
     errors.push(`${JSON.stringify(file)}: missing, linked, oversized, invalid text, invalid syntax or unreadable index`);
   }

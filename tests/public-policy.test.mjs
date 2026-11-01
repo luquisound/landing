@@ -310,3 +310,43 @@ test('publication guard rejects unsafe staged content when the working copy is s
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test('publication guard validates JavaScript and JSON syntax in both the index and working copy', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'luquisound-index-'));
+  const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const git = (...args) => execFileSync('git', args, { cwd: directory, stdio: 'pipe' });
+  const runGuard = () => execFileSync(process.execPath, ['scripts/check-public.mjs'], { cwd: directory, stdio: 'pipe' });
+  const fixtures = [
+    ['site/app.js', 'export const value = 1;\n', 'export const value = ;\n'],
+    ['scripts/fixture.mjs', 'export const value = 1;\n', 'export const value = ;\n'],
+    ['package.json', '{"type":"module"}\n', '{"type":}\n'],
+  ];
+  try {
+    await mkdir(path.join(directory, 'scripts'));
+    await mkdir(path.join(directory, 'site'));
+    for (const file of ['scripts/check-public.mjs', 'scripts/public-policy.mjs']) {
+      await copyFile(path.join(repository, file), path.join(directory, file));
+    }
+    const files = ['public-files.json', 'scripts/check-public.mjs', 'scripts/public-policy.mjs',
+      ...fixtures.map(([file]) => file)];
+    await writeFile(path.join(directory, 'public-files.json'), JSON.stringify(files));
+    for (const [file, valid] of fixtures) await writeFile(path.join(directory, file), valid);
+    git('init', '--quiet');
+    git('add', '--', ...files);
+    assert.match(runGuard().toString('utf8'), /Public boundary passed/);
+
+    for (const [file, valid, invalid] of fixtures) {
+      await writeFile(path.join(directory, file), invalid);
+      assert.throws(runGuard, (error) => error.stderr.toString('utf8').includes(`${JSON.stringify(file)}: invalid syntax`));
+      git('add', '--', file);
+      await writeFile(path.join(directory, file), valid);
+      assert.throws(runGuard, (error) => error.stderr.toString('utf8').includes(`${JSON.stringify(file)} (index): invalid syntax`));
+      git('add', '--', file);
+      assert.match(runGuard().toString('utf8'), /Public boundary passed/);
+    }
+  } finally {
+    assert.equal(path.dirname(path.resolve(directory)).toLowerCase(), path.resolve(tmpdir()).toLowerCase());
+    assert.match(path.basename(directory), /^luquisound-index-/);
+    await rm(directory, { recursive: true, force: true });
+  }
+});

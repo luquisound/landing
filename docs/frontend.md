@@ -54,6 +54,22 @@ motion. The current image remains visible until the requested image is ready.
 
 ## Validation
 
+Install development tools with `npm ci --ignore-scripts` and the browser with
+`npx playwright install chromium`. Playwright is a development dependency;
+the website still has no runtime dependencies or build step.
+
+`npm run verify` runs the publication guard, internal site checks, unit tests
+and Chromium smoke tests at desktop and mobile viewport sizes. The browser
+suite starts its own loopback preview and does not send messages or visit
+external contact destinations. Focused commands are:
+
+- `npm run check`: publication paths, file contents and index checks.
+- `npm run check:site`: internal resources and case/catalogue consistency.
+- `npm test`: unit and fixture-based regression tests.
+- `npm run test:browser`: consultation, history, dialogs and media smoke tests.
+
+Automated checks complement the following manual coverage:
+
 - Run `npm run verify` and `git diff --check` before a commit.
 - Check mobile, tablet, desktop and ultrawide home framing, source selection,
   reduced motion and poster fallback.
@@ -80,3 +96,14 @@ The consultation prepares a message locally and
 lets the visitor review, edit, copy or open it in WhatsApp. The visitor sends
 the message from the chat; there is no backend or automatic message delivery.
 Repository delivery does not deploy the website.
+
+## Before launch
+
+Keep `noindex,nofollow` during development. With the final domain and approved
+public media in place, review indexability on all four pages, canonical URLs,
+page titles/descriptions, social previews, a sitemap and confirmed business data.
+
+Prepare only the approved public directory for hosting. Verify HTTPS and
+production security headers as described in the [security baseline](security-baseline.md).
+Measure media delivery on the final host and check contact destinations and
+selected media privacy manually. Deployment requires separate authorization.

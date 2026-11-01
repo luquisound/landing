@@ -1,9 +1,11 @@
 # Contributing
 
-Use Node.js 22.23.0 or a later patched Node.js 22 release. There are no third-party npm dependencies.
+Use Node.js 22.23.0 or a later patched Node.js 22 release. The website has no
+runtime dependencies; Playwright is used only for development checks.
 
 ```sh
 npm ci --ignore-scripts
+npx playwright install chromium
 npm run verify
 git diff --check
 ```

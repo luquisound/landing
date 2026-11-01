@@ -9,6 +9,7 @@
 !/CONTRIBUTING.md
 !/package.json
 !/package-lock.json
+!/playwright.config.mjs
 !/public-files.json
 !/.github/
 !/docs/
@@ -31,8 +32,13 @@
 /scripts/*
 !/scripts/check-public.mjs
 !/scripts/public-policy.mjs
+!/scripts/check-site.mjs
 /tests/*
 !/tests/public-policy.test.mjs
+!/tests/site-content.test.mjs
+!/tests/browser/
+/tests/browser/*
+!/tests/browser/site.spec.mjs
 
 # Machine-local context, secrets and disposable artifacts stay private.
 .env

@@ -9,7 +9,12 @@
   "scripts": {
     "preview": "node scripts/preview-site.mjs",
     "check": "node scripts/check-public.mjs",
-    "test": "node --test",
-    "verify": "npm run check && npm test"
+    "check:site": "node scripts/check-site.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "verify": "npm run check && npm run check:site && npm test && npm run test:browser"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
   }
 }

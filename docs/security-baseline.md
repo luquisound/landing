@@ -13,10 +13,10 @@ No secrets are needed for the initial CI. Browser code must never contain privat
 - Git initialized with `main`; origin points to the supplied remote.
 - Deny-by-default ignore rules plus an independent exact public file manifest.
 - A Node.js standard-library guard checks indexed and visible candidate paths, selected credential patterns, local routes, file types, size, linked files, UTF-8 and JavaScript/JSON syntax. It validates the manifest before any commit and checks the complete index once files are staged.
-- Regression tests for publication policy. No third-party npm dependencies or install scripts.
+- Regression tests for publication policy and static site references, plus Chromium smoke tests for the visitor flows. Playwright is a development-only dependency; the website has no runtime dependencies or install scripts.
 - CI on pushes to `main` and PRs, with read-only tokens, no persisted checkout credentials, SHA-pinned actions, GitHub-hosted runners and job timeouts.
 - CodeQL with `security-extended` queries and the narrowly scoped permission needed to upload security results. GitHub treats fork PR uploads specially; no repository secrets are passed.
-- Weekly Dependabot updates for Actions, CODEOWNERS, contribution guidance and a security reporting policy.
+- Weekly Dependabot updates for Actions and npm development tools, CODEOWNERS, contribution guidance and a security reporting policy.
 - The local preview server permits only the selected landing pages, their scripts/styles and media, and rejects redirected filesystem paths. Configuration and private provenance are not served. It remains a development-only tool and does not define production security headers or a deployment bundle.
 
 ## Administrator setup

@@ -46,10 +46,18 @@
   const soundproofing = document.getElementById("service-dialog-soundproofing");
   const related = document.getElementById("service-dialog-related");
   const links = document.getElementById("service-dialog-work-links");
+  const videoRetry = document.createElement("button");
+  videoRetry.id = "service-video-retry";
+  videoRetry.type = "button";
+  videoRetry.className = "media-carousel-retry";
+  videoRetry.textContent = "Reintentar";
+  videoRetry.hidden = true;
   let carousel;
   let activeWork;
 
   function releaseVideo() {
+    mediaError.hidden = true;
+    videoRetry.hidden = true;
     video.pause();
     video.removeAttribute("src");
     video.removeAttribute("poster");
@@ -75,19 +83,37 @@
   }
 
   function getCarousel() {
-    carousel ??= window.LuquisoundUI.createMediaCarousel({
-      region: evidence,
-      stage,
-      image,
-      controls: mediaPicker,
-      error: mediaError,
-      onShow: showMedia
-    });
+    if (!carousel) {
+      carousel = window.LuquisoundUI.createMediaCarousel({
+        region: evidence,
+        stage,
+        image,
+        controls: mediaPicker,
+        error: mediaError,
+        onShow: showMedia
+      });
+      mediaPicker.append(videoRetry);
+    }
     return carousel;
   }
 
+  video.addEventListener("error", () => {
+    if (video.hidden || !dialog.open || !video.error) return;
+    mediaError.textContent = "No se pudo cargar el video. Podés reintentar o elegir otro trabajo.";
+    mediaError.hidden = false;
+    videoRetry.hidden = false;
+    mediaPicker.hidden = false;
+  });
+  videoRetry.addEventListener("click", async () => {
+    await carousel.show(0);
+    if (video.hidden) return;
+    video.focus();
+    video.play().catch(() => {});
+  });
+
   function selectWork(work, media, button) {
     picker.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+    releaseVideo();
     activeWork = work;
     getCarousel().setItems(media);
   }

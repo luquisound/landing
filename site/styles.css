@@ -120,18 +120,7 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 .gallery-information h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.2; }
 #service-dialog-description, #service-dialog-examples { color: var(--muted); margin-top: var(--space-2); font-size: 1rem; line-height: 1.6; }
 .service-dialog-cta { align-self: flex-start; margin-top: var(--space-4); }
-.contact-dialog { max-width: 560px; padding: 16px 24px 24px; }
-.contact-dialog h2 { font-size: clamp(1.75rem, 4.5vw, 2.75rem); line-height: 1.15; margin: 24px 0; }
-.contact-dialog form { display: flex; flex-direction: column; }
-.contact-dialog label { font-size: .875rem; margin-bottom: 8px; }
-.contact-dialog input, .contact-dialog select, .contact-dialog textarea { color: var(--white); background: var(--surface); width: 100%; min-height: 48px; padding: 12px; border: 1px solid var(--field-border); border-radius: var(--control-radius); font-size: 1rem; margin-bottom: 20px; }
-.contact-dialog textarea { resize: vertical; }
-.contact-dialog input::placeholder, .contact-dialog textarea::placeholder { color: var(--muted); }
-.contact-dialog input:focus-visible, .contact-dialog select:focus-visible, .contact-dialog textarea:focus-visible { outline-offset: 2px; }
 .form-note { font-size: .875rem; line-height: 1.5; color: var(--muted); margin-top: 16px; }
-.consultation-preview h3 { font-size: 1.125rem; line-height: 1.4; margin-bottom: 16px; }
-.consultation-preview textarea { min-height: 185px; line-height: 1.6; }
-.preview-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); }
 .page-shell { width: min(100%, var(--content-max)); margin-inline: auto; min-height: 100svh; padding: var(--page-top) var(--page-right) max(40px, env(safe-area-inset-bottom)) var(--page-left); }
 .page-heading { margin-bottom: var(--space-4); }
 .page-heading h1 { font-size: clamp(2rem, 7vw, 5.5rem); line-height: 1.1; }
@@ -143,14 +132,6 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 .work-name { min-width: 0; font-family: var(--display); font-size: .9375rem; font-weight: 700; font-stretch: 125%; line-height: 1.4; overflow-wrap: anywhere; }
 .work-open { display: flex; align-items: center; flex-shrink: 0; gap: 8px; min-height: 44px; font-size: .875rem; }
 .work-open > span { color: var(--yellow); font-size: 1.5rem; }
-.contact-layout { max-width: 1000px; }
-.contact-details { margin: 0; }
-.contact-details > div { padding: 16px 0; border-bottom: 1px solid var(--line); }
-.contact-details dt { font: .75rem var(--body); color: var(--muted); margin-bottom: 8px; }
-.contact-details dd { margin: 0; font-size: 1rem; line-height: 1.5; overflow-wrap: anywhere; }
-.contact-details a { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; }
-.contact-details a:hover { color: var(--yellow); }
-.contact-action { margin-top: var(--space-4); }
 .js .hero-content { animation: hero-enter 800ms var(--ease) both; }
 @keyframes hero-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes dialog-enter { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
@@ -158,16 +139,12 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 @media (min-width: 700px) {
   .hero-title { max-width: 1000px; }
   .work-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .contact-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: center; }
-  .contact-action { margin-top: 0; }
   .gallery-body { display: grid; grid-template-columns: 1.7fr 1fr; }
   .gallery-image-wrap img { height: min(75dvh, 750px); }
   .gallery-information { padding: var(--space-4); display: flex; flex-direction: column; }
 }
 @media (min-width: 700px) and (max-width: 999px) { .work-caption { flex-direction: column; align-items: flex-start; gap: 8px; } }
 @media (min-width: 1000px) {
-  .contact-action { display: flex; justify-content: center; }
-  .contact-action > .button { width: min(100%, 288px); min-height: 72px; padding-inline: var(--space-4); font-size: 1.125rem; }
   .site-header { padding-block: 23px; }
   .menu-toggle { display: none; }
   .js .navigation, .navigation { display: flex; width: auto; flex-wrap: nowrap; gap: var(--space-4); }
@@ -181,7 +158,6 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
   .hero-eyebrow { margin-bottom: 38px; font-size: .75rem; }
   .hero-cta { margin-top: 36px; min-width: 260px; }
 }
-@media (max-width: 374px) { .contact-dialog { padding-inline: 16px; } }
 @media (max-height: 560px) and (min-width: 600px) { .hero { padding-block: 104px 54px; } .hero-eyebrow { margin-bottom: 20px; } .hero-cta { margin-top: 22px; } }
 html:not(.js) .page-shell { padding-top: calc(var(--page-top) + 64px); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } .hero-media video { visibility: hidden; } }

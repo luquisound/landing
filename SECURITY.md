@@ -1,6 +1,6 @@
 # Security policy
 
-The supported version is the current `main` branch. This repository initially contains development infrastructure only; no production site or backend is deployed by its workflows.
+The supported version is the current `main` branch. This repository contains a static website, a local preview server and development tooling. Its workflows do not deploy a production site or backend.
 
 ## Reporting
 
@@ -8,7 +8,7 @@ Do not disclose credentials, client data or vulnerability details in public issu
 
 ## Scope and handling
 
-Relevant issues include credential disclosure, unintended publication of private files, workflow privilege escalation and unsafe delivery of future application code. Use synthetic evidence; do not access client data or test third-party services without authorization.
+Relevant issues include credential disclosure, unintended publication of private files, workflow privilege escalation and unsafe delivery of frontend code. Use synthetic evidence; do not access client data or test third-party services without authorization.
 
 If a credential is exposed, revoke or rotate it first. Removing it in a later commit does not remove it from history, forks, caches or logs. Coordinate any history changes and notification privately with the owner.
 
