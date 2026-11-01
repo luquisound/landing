@@ -44,9 +44,10 @@ async function expectWhatsApp(context, destinations, action, message) {
 
 test('consultation validates input and opens WhatsApp with an encoded message', async ({ context, page }) => {
   const destinations = await interceptWhatsApp(context);
+  await page.clock.setFixedTime(new Date('2031-06-01T12:00:00Z'));
   await page.goto('/contacto.html?interes=Insonorizaci%C3%B3n');
   const vehicle = page.getByLabel('¿Qué auto tenés?');
-  const year = page.getByLabel('Año (opcional)', { exact: true });
+  const year = page.getByLabel('Año', { exact: true });
   const idea = page.getByLabel('Contanos tu idea (opcional)', { exact: true });
   const consult = page.getByRole('button', { name: 'Consultar por WhatsApp' });
   await expect(page.getByLabel('¿Qué te interesa?')).toHaveValue('Insonorización');
@@ -54,6 +55,7 @@ test('consultation validates input and opens WhatsApp with an encoded message', 
 
   await consult.click();
   await expect(vehicle).toBeFocused();
+  await year.fill('2015');
   await vehicle.fill('   ');
   await consult.click();
   await expect(vehicle).toBeFocused();
@@ -62,12 +64,20 @@ test('consultation validates input and opens WhatsApp with an encoded message', 
   const vehicleText = '  Volkswagen Golf & GTI  ';
   const ideaText = '  Mejorar audio + vibraciones. ¿Qué recomendás? #consulta  ';
   await vehicle.fill(vehicleText);
-  for (const invalidYear of ['20', '20a4']) {
+  await year.fill('');
+  await consult.click();
+  await expect(year).toBeFocused();
+  expect(await year.evaluate(element => element.validity.valueMissing)).toBe(true);
+  for (const invalidYear of ['    ', '20', '20a4', '1899', '0000', '2032']) {
     await year.fill(invalidYear);
+    await expect(year).toHaveJSProperty('validationMessage', 'Ingresá un año entre 1900 y 2031.');
     await consult.click();
     await expect(year).toBeFocused();
-    expect(await year.evaluate(element => element.validity.patternMismatch)).toBe(true);
   }
+  await year.fill('2015');
+  await year.evaluate(element => { element.value = '2032'; });
+  await consult.click();
+  await expect(year).toHaveJSProperty('validationMessage', 'Ingresá un año entre 1900 y 2031.');
   expect(destinations).toEqual([]);
 
   await year.fill('2015');
@@ -81,22 +91,25 @@ test('consultation validates input and opens WhatsApp with an encoded message', 
   await expect(idea).toHaveValue(ideaText);
 });
 
-test('consultation accepts optional fields and uses current values on keyboard resubmission', async ({ context, page }) => {
+test('consultation accepts year boundaries and optional ideas on keyboard resubmission', async ({ context, page }) => {
   const destinations = await interceptWhatsApp(context);
+  await page.clock.setFixedTime(new Date('2031-06-01T12:00:00Z'));
   await page.goto('/contacto.html');
   const vehicle = page.getByLabel('¿Qué auto tenés?');
-  const year = page.getByLabel('Año (opcional)', { exact: true });
+  const year = page.getByLabel('Año', { exact: true });
   const idea = page.getByLabel('Contanos tu idea (opcional)', { exact: true });
   await vehicle.fill('Chevrolet Corsa');
+  await year.fill('1900');
   await expectWhatsApp(context, destinations, () => vehicle.press('Enter'),
-    'Hola Luquisound. Tengo un Chevrolet Corsa.\n\nMe interesa: Audio.');
+    'Hola Luquisound. Tengo un Chevrolet Corsa 1900.\n\nMe interesa: Audio.');
 
   await vehicle.fill('Volkswagen Golf');
-  await year.fill('2020');
+  await page.clock.setFixedTime(new Date('2032-06-01T12:00:00Z'));
+  await year.fill('2032');
   await idea.fill('   ');
   await page.getByLabel('¿Qué te interesa?').selectOption('Personalización');
   await expectWhatsApp(context, destinations, () => year.press('Enter'),
-    'Hola Luquisound. Tengo un Volkswagen Golf 2020.\n\nMe interesa: Personalización.');
+    'Hola Luquisound. Tengo un Volkswagen Golf 2032.\n\nMe interesa: Personalización.');
   await expect(page.locator('#consultation-form')).toBeVisible();
   await expect(vehicle).toHaveValue('Volkswagen Golf');
   await expect(idea).toHaveValue('   ');

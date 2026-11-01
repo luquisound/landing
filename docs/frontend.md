@@ -79,7 +79,8 @@ Automated checks complement the following manual coverage:
   closing during image loading, horizontal swipes alongside vertical scrolling,
   mixed photo/video collections, reduced motion and changing viewport sizes.
 - Check direct consultation opening by click and keyboard, repeated submissions,
-  service preselection, optional year/idea, four-digit year validation,
+  service preselection, optional idea, required four-digit year validation
+  from 1900 through the current calendar year,
   WhatsApp message encoding and the direct no-JavaScript link.
   Inspect or intercept the WhatsApp URL during testing; do not send a message.
 - Check that only selected website files and prepared media enter the index.
@@ -93,7 +94,8 @@ in three shots. Contact details include the workshop location, opening hours
 and a direct WhatsApp link. Contact presents the consultation inline, followed
 by compact workshop details and alternative channels on smaller screens; wider
 screens use two columns. Valid service-interest links focus the vehicle field.
-The consultation keeps make/model and an optional four-digit year in one row.
+The consultation keeps make/model and a required four-digit year in one row.
+The accepted years range from 1900 through the current calendar year.
 The idea is optional; empty ideas are omitted from the message. Submitting
 prepares a message locally and opens WhatsApp directly, preserving the form
 values for further edits. The visitor sends the message from the chat; there

@@ -408,6 +408,7 @@ if (consultationForm) {
   const selectedInterest = new URLSearchParams(location.search).get("interes");
   const interestField = document.getElementById("interest");
   const vehicleField = document.getElementById("vehicle");
+  const yearField = document.getElementById("vehicle-year");
   const whatsappBaseUrl = "https://wa.me/5491173581958";
   const hasSelectedInterest = [...interestField.options].some(option => option.value === selectedInterest);
   if (hasSelectedInterest) interestField.value = selectedInterest;
@@ -441,16 +442,24 @@ if (consultationForm) {
     vehicleField.focus({ preventScroll: true });
   });
   vehicleField.addEventListener("input", () => vehicleField.setCustomValidity(""));
+  function validateVehicleYear() {
+    const currentYear = new Date().getFullYear();
+    const year = Number(yearField.value);
+    const validYear = /^[0-9]{4}$/.test(yearField.value) && year >= 1900 && year <= currentYear;
+    yearField.setCustomValidity(yearField.value && !validYear ? `Ingresá un año entre 1900 y ${currentYear}.` : "");
+  }
+  yearField.addEventListener("input", validateVehicleYear);
   consultationForm.addEventListener("submit", (event) => {
     event.preventDefault();
     vehicleField.setCustomValidity(vehicleField.value.trim() ? "" : "Completá este campo.");
+    validateVehicleYear();
     if (!consultationForm.reportValidity()) return;
     const data = new FormData(consultationForm);
     const vehicle = String(data.get("vehicle")).trim();
     const year = String(data.get("year")).trim();
     const interest = String(data.get("interest"));
     const idea = String(data.get("idea")).trim();
-    const message = `Hola Luquisound. Tengo un ${vehicle}${year ? ` ${year}` : ""}.\n\nMe interesa: ${interest}.` + (idea ? `\n\nMi idea: ${idea}` : "");
+    const message = `Hola Luquisound. Tengo un ${vehicle} ${year}.\n\nMe interesa: ${interest}.` + (idea ? `\n\nMi idea: ${idea}` : "");
     window.open(whatsappBaseUrl + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
   });
   document.getElementById("consultation-fields").disabled = false;
