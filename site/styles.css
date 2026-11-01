@@ -109,6 +109,13 @@ dialog[open] { animation: dialog-enter var(--duration-dialog) var(--ease); }
 .gallery-dialog > .dialog-header { padding: 12px 24px; border-bottom: 1px solid var(--line); }
 .gallery-image-wrap { min-width: 0; min-height: 200px; background: var(--surface); }
 .gallery-image-wrap img { width: 100%; height: min(52dvh, 650px); object-fit: contain; }
+.media-carousel-stage { position: relative; min-width: 0; touch-action: pan-y pinch-zoom; }
+.media-carousel-controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: var(--space-2); }
+.media-carousel-controls button { display: inline-flex; align-items: center; justify-content: center; width: 44px; min-height: 44px; padding: 8px; border: 1px solid var(--line); border-radius: var(--control-radius); background: none; color: var(--muted); font-size: 1.25rem; line-height: 1; transition: color var(--duration-ui), border-color var(--duration-ui), background var(--duration-ui); }
+.media-carousel-controls button:hover, .media-carousel-controls button:focus-visible { border-color: var(--yellow); color: var(--yellow); }
+.media-carousel-controls button:active { background: var(--surface); }
+.media-carousel-counter { min-width: 52px; color: var(--muted); font-size: .8125rem; line-height: 1.5; text-align: center; font-variant-numeric: tabular-nums; }
+.media-carousel-controls .media-carousel-retry { width: auto; padding-inline: 12px; font-size: .875rem; }
 .gallery-information { padding: var(--space-3); }
 .gallery-information h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.2; }
 #service-dialog-description, #service-dialog-examples { color: var(--muted); margin-top: var(--space-2); font-size: 1rem; line-height: 1.6; }

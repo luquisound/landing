@@ -84,7 +84,226 @@ document.querySelectorAll("dialog").forEach((dialog) => {
 document.querySelectorAll("[data-close-dialog]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(button.closest("dialog")));
 });
-window.LuquisoundUI = { openDialog, closeDialog };
+function createMediaCarousel({ region, stage, image, controls, error, onShow }) {
+  let items = [];
+  let displayedIndex = -1;
+  let requestedIndex = -1;
+  let generation = 0;
+  let motionVersion = 0;
+  let preparedImages = new Map();
+  let swipe = null;
+  const animations = new Set();
+  const previous = document.createElement("button");
+  const next = document.createElement("button");
+  const counter = document.createElement("span");
+  const announcement = document.createElement("span");
+  const retry = document.createElement("button");
+  previous.type = next.type = retry.type = "button";
+  previous.textContent = "←";
+  next.textContent = "→";
+  previous.setAttribute("aria-label", "Foto o video anterior");
+  next.setAttribute("aria-label", "Foto o video siguiente");
+  counter.className = "media-carousel-counter";
+  counter.setAttribute("aria-hidden", "true");
+  announcement.className = "sr-only";
+  announcement.setAttribute("aria-live", "polite");
+  announcement.setAttribute("aria-atomic", "true");
+  retry.className = "media-carousel-retry";
+  retry.textContent = "Reintentar";
+  retry.hidden = true;
+  controls.classList.add("media-carousel-controls");
+  controls.replaceChildren(previous, counter, next, retry, announcement);
+  region.setAttribute("role", "group");
+  region.setAttribute("aria-roledescription", "carrusel");
+  if (!region.hasAttribute("aria-label") && !region.hasAttribute("aria-labelledby")) region.setAttribute("aria-label", "Fotos y videos del trabajo");
+  stage.classList.add("media-carousel-stage");
+  stage.tabIndex = 0;
+
+  function cancelMotion() {
+    motionVersion += 1;
+    animations.forEach(animation => animation.cancel());
+    animations.clear();
+    stage.style.removeProperty("height");
+    stage.style.removeProperty("overflow");
+    image.style.removeProperty("opacity");
+  }
+
+  async function animate(element, keyframes, duration) {
+    if (!element.animate || reducedMotion.matches || document.hidden) return;
+    const animation = element.animate(keyframes, { duration, easing: "cubic-bezier(.16, 1, .3, 1)", fill: "forwards" });
+    animations.add(animation);
+    await animation.finished.catch(() => {});
+    animations.delete(animation);
+    animation.cancel();
+  }
+
+  function loadPhoto(media) {
+    const cache = preparedImages;
+    if (!cache.has(media.src)) {
+      const prepared = new Image();
+      prepared.src = media.src;
+      const ready = prepared.decode().then(() => prepared).catch(cause => {
+        cache.delete(media.src);
+        throw cause;
+      });
+      cache.set(media.src, ready);
+    }
+    return cache.get(media.src);
+  }
+
+  function updateControls() {
+    controls.hidden = items.length < 2;
+    previous.disabled = next.disabled = items.length < 2;
+    counter.textContent = `${displayedIndex < 0 ? "—" : displayedIndex + 1} / ${items.length}`;
+  }
+
+  function commit(media, index, prepared) {
+    image.hidden = media.type !== "image";
+    if (media.type === "image") {
+      stage.style.setProperty("--media-ratio", String(prepared.naturalWidth / prepared.naturalHeight));
+      image.width = prepared.naturalWidth;
+      image.height = prepared.naturalHeight;
+      image.src = media.src;
+      image.alt = media.alt || media.title || "Fotografía del trabajo";
+    } else {
+      stage.style.removeProperty("--media-ratio");
+    }
+    onShow(media, index);
+    displayedIndex = index;
+    updateControls();
+    announcement.textContent = `${media.type === "video" ? "Video" : "Foto"} ${index + 1} de ${items.length}: ${media.title || media.alt || "Trabajo Luquisound"}`;
+    for (const offset of [-1, 1]) {
+      const adjacent = items[(index + offset + items.length) % items.length];
+      if (adjacent?.type === "image") loadPhoto(adjacent).catch(() => {});
+    }
+  }
+
+  async function select(index, animated) {
+    if (!items.length) return;
+    requestedIndex = (index % items.length + items.length) % items.length;
+    const selection = requestedIndex;
+    const media = items[selection];
+    const request = ++generation;
+    cancelMotion();
+    const motion = motionVersion;
+    const canAnimate = () => animated && motion === motionVersion && !reducedMotion.matches && !document.hidden;
+    error.hidden = true;
+    retry.hidden = true;
+    stage.setAttribute("aria-busy", "true");
+    try {
+      const prepared = media.type === "image" ? await loadPhoto(media) : null;
+      if (request !== generation) return;
+      const previousPhoto = displayedIndex >= 0 && !image.hidden;
+      if (canAnimate() && previousPhoto && media.type === "image") {
+        await animate(image, [{ opacity: 1 }, { opacity: 0 }], 90);
+        if (request !== generation) return;
+        if (canAnimate()) image.style.opacity = "0";
+        const fromHeight = stage.getBoundingClientRect().height;
+        commit(media, selection, prepared);
+        // The displayed image can retain its previous intrinsic size just after src changes.
+        const toHeight = stage.getBoundingClientRect().width * prepared.naturalHeight / prepared.naturalWidth;
+        if (canAnimate() && Math.abs(fromHeight - toHeight) > 1) {
+          stage.style.height = `${toHeight}px`;
+          stage.style.overflow = "hidden";
+          await animate(stage, [{ height: `${fromHeight}px` }, { height: `${toHeight}px` }], 120);
+          if (request !== generation) return;
+        }
+        stage.style.removeProperty("height");
+        stage.style.removeProperty("overflow");
+        if (canAnimate()) await animate(image, [{ opacity: 0 }, { opacity: 1 }], 120);
+      } else {
+        commit(media, selection, prepared);
+      }
+      if (request !== generation) return;
+      image.style.removeProperty("opacity");
+      stage.removeAttribute("aria-busy");
+    } catch {
+      if (request !== generation) return;
+      cancelMotion();
+      stage.removeAttribute("aria-busy");
+      error.textContent = "No se pudo cargar la imagen. Podés reintentar o elegir otra con las flechas.";
+      error.hidden = false;
+      retry.hidden = false;
+      controls.hidden = false;
+      requestedIndex = displayedIndex;
+      retry.onclick = () => select(selection, true);
+    }
+  }
+
+  function show(index) {
+    return select(index, true);
+  }
+
+  function navigate(direction) {
+    if (items.length) show((requestedIndex < 0 ? 0 : requestedIndex) + direction);
+  }
+
+  function clear() {
+    generation += 1;
+    cancelMotion();
+    items = [];
+    displayedIndex = requestedIndex = -1;
+    preparedImages = new Map();
+    swipe = null;
+    error.hidden = true;
+    image.hidden = true;
+    image.removeAttribute("src");
+    stage.style.removeProperty("--media-ratio");
+    retry.hidden = true;
+    retry.onclick = null;
+    controls.hidden = true;
+    announcement.textContent = "";
+    stage.removeAttribute("aria-busy");
+  }
+
+  function setItems(media) {
+    clear();
+    items = media;
+    updateControls();
+    return select(0, false);
+  }
+
+  previous.addEventListener("click", () => navigate(-1));
+  next.addEventListener("click", () => navigate(1));
+  region.addEventListener("keydown", event => {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || items.length < 2) return;
+    if (!stage.contains(event.target) && !controls.contains(event.target)) return;
+    if (event.target.closest("video, input, select, textarea, [contenteditable]")) return;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    navigate(event.key === "ArrowLeft" ? -1 : 1);
+  });
+  stage.addEventListener("pointerdown", event => {
+    if (!event.isPrimary) {
+      swipe = null;
+      return;
+    }
+    if (!["touch", "pen"].includes(event.pointerType) || items.length < 2 || image.hidden || event.target.closest("video")) return;
+    swipe = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    stage.setPointerCapture(event.pointerId);
+  });
+  stage.addEventListener("pointermove", event => {
+    if (swipe?.id === event.pointerId && Math.abs(event.clientY - swipe.y) > 20 && Math.abs(event.clientY - swipe.y) > Math.abs(event.clientX - swipe.x)) swipe = null;
+  });
+  stage.addEventListener("pointerup", event => {
+    const gesture = swipe;
+    swipe = null;
+    if (!gesture || gesture.id !== event.pointerId) return;
+    const horizontal = event.clientX - gesture.x;
+    const vertical = event.clientY - gesture.y;
+    if (Math.abs(horizontal) >= 40 && Math.abs(horizontal) > Math.abs(vertical) * 1.5) navigate(horizontal < 0 ? 1 : -1);
+  });
+  stage.addEventListener("pointercancel", () => { swipe = null; });
+  stage.addEventListener("lostpointercapture", () => { swipe = null; });
+  stage.addEventListener("dragstart", event => { if (event.target === image) event.preventDefault(); });
+  window.addEventListener("resize", cancelMotion);
+  reducedMotion.addEventListener("change", cancelMotion);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) cancelMotion(); });
+  clear();
+  return { setItems, show, clear };
+}
+
+window.LuquisoundUI = { openDialog, closeDialog, createMediaCarousel };
 
 function applyMotionPreference() {
   if (!video || !hero) return;

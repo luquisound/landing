@@ -157,12 +157,12 @@
     <div class="dialog-header"><p class="eyebrow">Luquisound / Trabajos</p><button class="dialog-close" type="button" data-close-dialog aria-label="Cerrar trabajo">Cerrar <span aria-hidden="true">×</span></button></div>
     <div class="project-content">
       <div class="project-visual">
-        <div class="lightbox-stage">
+        <div class="lightbox-stage media-carousel-stage">
           <img id="project-image" alt="" hidden>
           <video id="project-video" controls playsinline preload="none" aria-label="Video del trabajo" hidden></video>
           <p class="project-media-error" id="project-media-error" role="status" hidden>La pieza no pudo cargarse. Podés elegir otra imagen o volver a intentarlo.</p>
         </div>
-        <div class="project-media-selector" id="project-media-selector" role="group" aria-label="Elegir foto o video" hidden></div>
+        <div class="media-carousel-controls" id="project-media-selector" role="group" aria-label="Fotos y videos del trabajo" hidden></div>
       </div>
       <div class="project-description">
         <h2 id="project-title">Trabajo</h2>
@@ -174,7 +174,7 @@
     </div>
     <div class="lightbox-bottom">
       <p class="project-media-title" id="project-media-title"></p>
-      <div class="lightbox-controls"><button id="project-prev" type="button" aria-label="Trabajo anterior">←</button><span id="project-counter" aria-live="polite"></span><button id="project-next" type="button" aria-label="Trabajo siguiente">→</button></div>
+      <div class="lightbox-controls" role="group" aria-label="Cambiar trabajo"><span class="project-navigation-label">Trabajos</span><button id="project-prev" type="button" aria-label="Trabajo anterior">←</button><span id="project-counter" aria-live="polite"></span><button id="project-next" type="button" aria-label="Trabajo siguiente">→</button></div>
     </div>
   </dialog>
 </body>

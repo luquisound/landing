@@ -43,6 +43,11 @@ standalone photographs.
 Cases can belong to multiple filters. Case links, filters and columns restore
 through browser history. Video sources are released when their dialog closes
 or the selected media changes.
+Service and Work dialogs use manual media carousels with previous/next controls,
+a position counter and horizontal swipes on photographs. Media navigation wraps
+within the selected work; Work navigation remains separate. Photographs retain
+their proportions, with short fades and height transitions disabled for reduced
+motion. The current image remains visible until the requested image is ready.
 
 ## Validation
 
@@ -51,6 +56,9 @@ or the selected media changes.
   reduced motion and poster fallback.
 - Check service links, case filters, direct case URLs, browser history,
   keyboard navigation, manual playback and media release.
+- Check carousel wraparound, rapid navigation, image failures, changing work or
+  closing during image loading, horizontal swipes alongside vertical scrolling,
+  mixed photo/video collections, reduced motion and changing viewport sizes.
 - Check the consultation preview, repeated edits, service preselection,
   WhatsApp message encoding, clipboard fallback and direct no-JavaScript link.
   Inspect or intercept the WhatsApp URL during testing; do not send a message.

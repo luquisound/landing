@@ -105,13 +105,16 @@
         </details>
       </section>
       <div class="gallery-image-wrap service-media">
-        <figure id="service-dialog-evidence">
-          <img id="service-dialog-image" src="assets/soundproofing.jpg" alt="Detalle de una puerta con material de insonorización" aria-describedby="service-dialog-caption" width="1013" height="1800">
-          <video id="service-dialog-video" controls playsinline muted preload="none" aria-describedby="service-dialog-caption" hidden></video>
+        <figure id="service-dialog-evidence" role="group" aria-roledescription="carrusel" aria-label="Fotos y videos del trabajo">
+          <div class="media-carousel-stage" id="service-dialog-stage">
+            <img id="service-dialog-image" src="assets/soundproofing.jpg" alt="Detalle de una puerta con material de insonorización" aria-describedby="service-dialog-caption" width="1013" height="1800">
+            <video id="service-dialog-video" controls playsinline muted preload="none" aria-describedby="service-dialog-caption" hidden></video>
+            <p class="service-media-error" id="service-dialog-error" role="status" hidden>No pudimos cargar la imagen. Podés volver a intentarlo con las flechas.</p>
+          </div>
+          <div class="media-carousel-controls" id="service-dialog-media" role="group" aria-label="Recorrer fotos y videos" hidden></div>
           <figcaption id="service-dialog-caption" hidden></figcaption>
         </figure>
         <div class="service-clip-picker" id="service-dialog-clips" role="group" aria-label="Elegir un trabajo para ver" hidden></div>
-        <div class="service-clip-picker service-photo-picker" id="service-dialog-media" role="group" aria-label="Elegir foto del trabajo" hidden></div>
       </div>
       <div class="gallery-information">
         <p id="service-dialog-examples" hidden></p>

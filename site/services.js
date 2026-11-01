@@ -37,6 +37,8 @@
   const image = document.getElementById("service-dialog-image");
   const video = document.getElementById("service-dialog-video");
   const evidence = document.getElementById("service-dialog-evidence");
+  const stage = document.getElementById("service-dialog-stage");
+  const mediaError = document.getElementById("service-dialog-error");
   const caption = document.getElementById("service-dialog-caption");
   const picker = document.getElementById("service-dialog-clips");
   const mediaPicker = document.getElementById("service-dialog-media");
@@ -44,6 +46,8 @@
   const soundproofing = document.getElementById("service-dialog-soundproofing");
   const related = document.getElementById("service-dialog-related");
   const links = document.getElementById("service-dialog-work-links");
+  let carousel;
+  let activeWork;
 
   function releaseVideo() {
     video.pause();
@@ -53,43 +57,44 @@
     video.hidden = true;
   }
 
-  function selectMedia(work, media, button) {
+  function showMedia(media) {
     releaseVideo();
     evidence.hidden = false;
-    image.hidden = media.type === "video";
     if (media.type === "video") {
       video.src = media.src;
       if (media.poster) video.poster = media.poster;
-      video.setAttribute("aria-label", media.alt || "Video del trabajo " + work.title);
+      video.setAttribute("aria-label", media.alt || "Video del trabajo " + activeWork.title);
       video.hidden = false;
-    } else {
-      image.src = media.src;
-      image.alt = media.alt;
     }
     const title = document.createElement("strong");
-    title.textContent = work.title;
+    title.textContent = activeWork.title;
     const description = document.createElement("span");
-    description.textContent = media.title || work.summary;
+    description.textContent = media.title || activeWork.summary;
     caption.replaceChildren(title, description);
     caption.hidden = false;
-    mediaPicker.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  }
+
+  function getCarousel() {
+    carousel ??= window.LuquisoundUI.createMediaCarousel({
+      region: evidence,
+      stage,
+      image,
+      controls: mediaPicker,
+      error: mediaError,
+      onShow: showMedia
+    });
+    return carousel;
   }
 
   function selectWork(work, media, button) {
     picker.querySelectorAll("button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
-    mediaPicker.replaceChildren();
-    mediaPicker.hidden = media.length < 2;
-    media.forEach((item, index) => {
-      const choice = document.createElement("button");
-      const label = item.type === "video" ? "Video" : "Foto";
-      choice.type = "button";
-      choice.textContent = `${label} ${index + 1}`;
-      choice.setAttribute("aria-label", `Ver ${label.toLowerCase()} ${index + 1} de ${media.length}: ${item.title || work.title}`);
-      choice.setAttribute("aria-pressed", String(index === 0));
-      choice.addEventListener("click", () => selectMedia(work, item, choice));
-      mediaPicker.append(choice);
-      if (index === 0) selectMedia(work, item, choice);
-    });
+    activeWork = work;
+    getCarousel().setItems(media);
+  }
+
+  function releaseMedia() {
+    carousel?.clear();
+    releaseVideo();
   }
 
   function prepare(card) {
@@ -101,15 +106,12 @@
     soundproofing.querySelectorAll("details").forEach(item => { item.open = false; });
     topics.hidden = service.topics.length === 0;
     related.querySelector("h3").textContent = id === "insonorizacion" ? "Trabajos de insonorización" : "Trabajos relacionados";
-    releaseVideo();
-    image.hidden = false;
+    releaseMedia();
+    image.hidden = true;
+    image.removeAttribute("src");
     evidence.hidden = false;
     caption.hidden = true;
-    mediaPicker.replaceChildren();
-    mediaPicker.hidden = true;
     const cardImage = card.querySelector("img");
-    image.src = cardImage.getAttribute("src");
-    image.alt = cardImage.alt;
     document.getElementById("service-dialog-title").textContent = service.title;
     document.getElementById("service-dialog-description").textContent = service.description;
     document.getElementById("service-dialog-examples").hidden = true;
@@ -164,11 +166,15 @@
       if (index === 0) selectWork(work, media, button);
     });
     picker.hidden = examples.length < 2;
+    if (!examples.length) {
+      activeWork = service;
+      getCarousel().setItems([{ type: "image", src: cardImage.getAttribute("src"), alt: cardImage.alt, title: service.title }]);
+    }
     return { name: service.title, title: service.title, cta };
   }
 
-  dialog.addEventListener("close", releaseVideo);
-  window.addEventListener("pagehide", releaseVideo);
+  dialog.addEventListener("close", releaseMedia);
+  window.addEventListener("pagehide", releaseMedia);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) video.pause();
   });

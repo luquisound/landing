@@ -82,7 +82,14 @@
   color: var(--yellow);
 }
 .service-clip-picker button:hover { border-color: var(--yellow); }
-.service-photo-picker { margin-top: var(--space-2); }
+.service-media-error {
+  margin-top: var(--space-1);
+  padding: var(--space-2);
+  background: var(--black);
+  color: var(--muted);
+  font-size: .875rem;
+  line-height: 1.5;
+}
 .service-topics {
   padding: 0;
   margin: var(--space-3) 0 0;

@@ -11,6 +11,8 @@
   const video = document.getElementById("project-video");
   const mediaError = document.getElementById("project-media-error");
   const mediaSelector = document.getElementById("project-media-selector");
+  const mediaRegion = dialog?.querySelector(".project-visual");
+  const mediaStage = dialog?.querySelector(".lightbox-stage");
   const mediaTitle = document.getElementById("project-media-title");
   const title = document.getElementById("project-title");
   const summary = document.getElementById("project-summary");
@@ -25,12 +27,11 @@
   const cases = new Map((window.LuquisoundCases || []).map(project => [project.id, project]));
   const categories = { all: "Todos los trabajos", audio: "Audio", insonorizacion: "Insonorización", personalizacion: "Personalización" };
   let activeCard = null;
-  let activeMedia = [];
   let revealObserver = null;
   let restoringHistory = false;
   let leavingPage = false;
 
-  if (!wall || !cards.length || !dialog || !image || !video || !title || !counter || !previous || !next || !ui) return;
+  if (!wall || !cards.length || !dialog || !image || !video || !mediaRegion || !mediaStage || !mediaSelector || !mediaError || !title || !counter || !previous || !next || !ui?.createMediaCarousel) return;
 
   const cardId = card => card.dataset.case || `foto-${card.dataset.index}`;
   const cardCategories = card => card.dataset.category.split(/\s+/);
@@ -105,55 +106,31 @@
     video.hidden = true;
   }
 
-  function releaseMedia() {
-    releaseVideo();
-    image.removeAttribute("src");
-    image.hidden = true;
-    mediaError.hidden = true;
-  }
-
-  function showMedia(index) {
-    const media = activeMedia[index];
-    if (!media) return;
-    releaseMedia();
-    if (media.type === "video") {
-      video.setAttribute("aria-label", media.alt || media.title);
-      video.poster = media.poster || "";
-      video.src = media.src;
-      video.hidden = false;
-    } else {
-      image.alt = media.alt;
-      image.src = media.src;
-      image.hidden = false;
-    }
-    mediaTitle.textContent = media.title || "Fotografía";
-    [...mediaSelector.children].forEach((button, buttonIndex) => {
-      const selected = buttonIndex === index;
-      button.classList.toggle("is-active", selected);
-      button.setAttribute("aria-pressed", String(selected));
-    });
-  }
-
-  function buildMediaSelector() {
-    mediaSelector.replaceChildren();
-    mediaSelector.hidden = activeMedia.length < 2;
-    const photoCount = activeMedia.filter(media => media.type === "image").length;
-    let photoIndex = 0;
-    activeMedia.forEach((media, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
+  const carousel = ui.createMediaCarousel({
+    region: mediaRegion,
+    stage: mediaStage,
+    image,
+    controls: mediaSelector,
+    error: mediaError,
+    onShow(media) {
+      releaseVideo();
+      mediaStage.dataset.mediaType = media.type;
       if (media.type === "video") {
-        button.textContent = index > 1 ? media.title : "Ver video";
-        button.setAttribute("aria-label", `Ver video: ${media.title}`);
-      } else {
-        photoIndex += 1;
-        button.textContent = photoCount > 1 ? `Foto ${photoIndex}` : "Ver foto";
-        button.setAttribute("aria-label", `Ver foto ${photoIndex} de ${photoCount}: ${media.title}`);
+        video.setAttribute("aria-label", media.alt || media.title);
+        video.poster = media.poster || "";
+        video.src = media.src;
+        video.hidden = false;
       }
-      button.setAttribute("aria-pressed", "false");
-      button.addEventListener("click", () => showMedia(index));
-      mediaSelector.append(button);
-    });
+      const type = media.type === "video" ? "Video" : "Foto";
+      mediaTitle.textContent = media.title ? `${type} · ${media.title}` : type;
+    }
+  });
+
+  function releaseMedia() {
+    carousel.clear();
+    releaseVideo();
+    delete mediaStage.dataset.mediaType;
+    mediaTitle.textContent = "";
   }
 
   function updateCounter() {
@@ -172,6 +149,7 @@
   }
 
   function selectProject(card, updateUrl = true) {
+    releaseMedia();
     activeCard = card;
     const project = cases.get(card.dataset.case);
     const sourceImage = card.querySelector("img");
@@ -199,10 +177,9 @@
     consultation.href = project?.serviceRefs.length === 1
       ? `contacto.html?interes=${encodeURIComponent(categories[project.serviceRefs[0]])}`
       : "contacto.html";
-    activeMedia = project?.media || [{ type: "image", src: sourceImage.getAttribute("src"), alt: sourceImage.alt, title: title.textContent }];
+    const media = project?.media || [{ type: "image", src: sourceImage.getAttribute("src"), alt: sourceImage.alt, title: title.textContent }];
     dialog.classList.toggle("has-case", Boolean(project));
-    buildMediaSelector();
-    showMedia(0);
+    carousel.setItems(media);
     updateCounter();
     if (updateUrl) updateWorkUrl();
   }
@@ -235,7 +212,7 @@
   previous.addEventListener("click", () => navigateProject(-1));
   next.addEventListener("click", () => navigateProject(1));
   dialog.addEventListener("keydown", event => {
-    if (event.target.closest("video") || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+    if (event.defaultPrevented || event.target.closest("video") || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
     event.preventDefault();
     navigateProject(event.key === "ArrowLeft" ? -1 : 1);
   });
@@ -262,7 +239,6 @@
   dialog.addEventListener("close", () => {
     releaseMedia();
     activeCard = null;
-    activeMedia = [];
     if (restoringHistory) {
       restoringHistory = false;
       return;
@@ -291,7 +267,6 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) video.pause();
   });
-  image.addEventListener("error", () => { if (!image.hidden) mediaError.hidden = false; });
   video.addEventListener("error", () => { if (!video.hidden) mediaError.hidden = false; });
 
   function applyMotionPreference() {

@@ -35,16 +35,16 @@
 .work-gallery-page .gallery-tail { width: min(100%, var(--content-max)); margin: 24px auto 0; padding-inline: var(--page-left) var(--page-right); text-align: right; }
 .work-gallery-page .project-lightbox { position: fixed; inset: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: max(16px, env(safe-area-inset-top)) var(--page-right) max(24px, env(safe-area-inset-bottom)) var(--page-left); overflow-y: auto; border: 0; background: var(--black); }
 .work-gallery-page .project-lightbox[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: var(--space-2); }
+.work-gallery-page .project-lightbox:has(.lightbox-stage[data-media-type="image"]) { grid-template-rows: auto auto auto; align-content: start; }
 .work-gallery-page .project-content { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0; gap: var(--space-4); }
 .work-gallery-page .project-lightbox:not(.has-case) .project-content { grid-template-rows: minmax(0, 1fr) auto; gap: 16px; }
 .work-gallery-page .project-lightbox.has-case .project-content { grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); }
 .work-gallery-page .project-visual { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 16px; }
 .work-gallery-page .lightbox-stage { position: relative; min-height: 0; flex: 1; display: flex; align-items: center; justify-content: center; background: var(--surface); }
 .work-gallery-page .lightbox-stage img, .work-gallery-page .lightbox-stage video { width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.work-gallery-page .lightbox-stage[data-media-type="image"] { width: 100%; height: auto; max-width: calc(max(240px, 100dvh - 220px) * var(--media-ratio)); margin-inline: auto; flex: none; background: transparent; }
+.work-gallery-page .lightbox-stage img { height: auto; }
 .work-gallery-page .project-media-error { position: absolute; inset: auto 16px 16px; padding: 16px; background: rgb(0 0 0 / .9); font-size: .875rem; line-height: 1.5; }
-.work-gallery-page .project-media-selector { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
-.work-gallery-page .project-media-selector button { min-height: 44px; padding: 10px 16px; border: 1px solid var(--line); border-radius: var(--control-radius); background: none; color: var(--muted); font-size: .875rem; }
-.work-gallery-page .project-media-selector button.is-active { border-color: var(--yellow); color: var(--white); }
 .work-gallery-page .lightbox-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .work-gallery-page .project-description { min-width: 0; overflow-y: auto; }
 .work-gallery-page .project-description h2 { font-size: clamp(1.375rem, 2vw, 1.875rem); line-height: 1.25; }
@@ -60,6 +60,7 @@
 .work-gallery-page .lightbox-controls { display: flex; align-items: center; justify-content: center; gap: var(--space-2); flex: 0 0 auto; }
 .work-gallery-page .lightbox-controls button { min-width: 48px; min-height: 48px; padding: 0; border: 1px solid var(--line); border-radius: var(--control-radius); background: none; font-size: 1.5rem; }
 .work-gallery-page .lightbox-controls span { min-width: 64px; font-size: .75rem; font-variant-numeric: tabular-nums; text-align: center; }
+.work-gallery-page .lightbox-controls .project-navigation-label { min-width: 0; color: var(--muted); }
 .work-gallery-page .lightbox-controls button:not(:disabled):hover { color: var(--yellow); border-color: var(--yellow); }
 @media (hover: hover) and (pointer: fine) { .work-gallery-page .project-card:hover img { transform: scale(1.025); } }
 @media (max-width: 999px) {
@@ -77,9 +78,7 @@
   .work-gallery-page .project-steps li + li { margin-top: 0; }
 }
 @media (max-width: 699px) {
-  /* Only photographs size the stage intrinsically; videos retain their player. */
-  .work-gallery-page .lightbox-stage:has(img:not([hidden])) { height: auto; }
-  .work-gallery-page .lightbox-stage img { height: auto; }
+  .work-gallery-page .lightbox-stage[data-media-type="image"] { max-width: none; }
   .work-gallery-page .gallery-toolbar { display: block; }
   .work-gallery-page .gallery-wall, .work-gallery-page .gallery-wall[data-columns] { columns: 1; padding-inline: 8px; }
   .work-gallery-page .card-tall { aspect-ratio: 4 / 5; }
