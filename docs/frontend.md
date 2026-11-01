@@ -36,7 +36,10 @@ BMW door-work clip, Silverado photographs and Corsa door-work clip. Service
 evidence supports both photographs and manually played videos.
 The Mustang collection contains two process photographs followed by its
 exterior; the Silverado contains three process photographs and its exterior
-last. Prepared exterior framing is also used by both gallery thumbnails.
+last in Services. Work adds a Silverado engine-bay photograph before that
+exterior through the case's optional `workOnlyMedia` collection; shared service
+media remain unchanged. Prepared exterior framing is also used by both gallery
+thumbnails.
 Work opens with the Mustang and Silverado soundproofing cases, followed by
 the eight existing case collections, ten manually played clips and eight
 standalone photographs.

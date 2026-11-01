@@ -179,9 +179,13 @@
       ? `contacto.html?interes=${encodeURIComponent(categories[project.serviceRefs[0]])}`
       : "contacto.html";
     const media = project?.media || [{ type: "image", src: sourceImage.getAttribute("src"), alt: sourceImage.alt, title: title.textContent }];
+    // Work-only additions precede the shared final photograph.
+    const workMedia = project?.workOnlyMedia?.length
+      ? [...media.slice(0, -1), ...project.workOnlyMedia, ...media.slice(-1)]
+      : media;
     dialog.classList.toggle("has-case", Boolean(project));
     if (card.dataset.photoCrop) mediaStage.dataset.photoCrop = card.dataset.photoCrop;
-    carousel.setItems(media);
+    carousel.setItems(workMedia);
     updateCounter();
     if (updateUrl) updateWorkUrl();
   }

@@ -26,6 +26,9 @@ window.LuquisoundCases = [
       { type: "image", src: "assets/case-silverado-frente.jpg", alt: "Frente de la cabina de la Silverado con el tablero retirado y el panel todavía sin material de insonorización", title: "Frente con el tablero retirado" },
       { type: "image", src: "assets/case-silverado-panel.jpg", alt: "Material de insonorización colocado en el panel frontal de la cabina de la Silverado", title: "Tratamiento del panel frontal" },
       { type: "image", src: "assets/case-silverado-insonorizacion.jpg", alt: "Vista exterior de la Chevrolet Silverado verde en el taller Luquisound", title: "Silverado en el taller" }
+    ],
+    workOnlyMedia: [
+      { type: "image", src: "assets/case-silverado-motor.jpg", alt: "Vano motor de la Chevrolet Silverado verde, con conducto de admisión cromado y filtro cónico visibles", title: "Vano motor de la Silverado" }
     ]
   },
   {
