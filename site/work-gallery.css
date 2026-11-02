@@ -46,7 +46,7 @@
 .work-gallery-page .lightbox-stage[data-media-type="image"] { width: 100%; height: auto; max-width: calc(max(240px, 100dvh - 220px) * var(--media-ratio)); margin-inline: auto; flex: none; background: transparent; }
 .work-gallery-page .lightbox-stage[data-photo-crop="4:3"] { aspect-ratio: 4 / 3; max-width: min(1012px, calc(max(240px, 100dvh - 220px) * 4 / 3)); overflow: hidden; }
 .work-gallery-page .lightbox-stage[data-photo-crop="4:3"] img { position: absolute; inset: 0; height: 100%; object-fit: cover; object-position: center; }
-.work-gallery-page .lightbox-stage[data-media-type="video"] { width: fit-content; height: auto; max-width: 100%; flex: none; background: transparent; }
+.work-gallery-page .lightbox-stage[data-media-type="video"] { width: fit-content; height: auto; max-width: 100%; margin-inline: auto; flex: none; background: transparent; }
 .work-gallery-page .lightbox-stage img { height: auto; }
 .work-gallery-page .lightbox-stage video { width: auto; height: auto; max-width: 100%; max-height: max(240px, 100dvh - 220px); }
 .work-gallery-page .project-media-error { position: absolute; inset: auto 16px 16px; padding: 16px; background: rgb(0 0 0 / .9); font-size: .875rem; line-height: 1.5; }
@@ -68,9 +68,6 @@
 .work-gallery-page .lightbox-controls .project-navigation-label { min-width: 0; color: var(--muted); }
 .work-gallery-page .lightbox-controls button:not(:disabled):hover { color: var(--yellow); border-color: var(--yellow); }
 @media (hover: hover) and (pointer: fine) { .work-gallery-page .project-card:hover img { transform: scale(1.025); } }
-@media (min-width: 1000px) {
-  .work-gallery-page .project-lightbox.has-case:has(.lightbox-stage[data-media-type="video"]) .project-content { grid-template-columns: minmax(0, max-content) minmax(260px, 340px); justify-content: center; }
-}
 @media (max-width: 999px) {
   .work-gallery-page .gallery-wall, .work-gallery-page .gallery-wall[data-columns="3"] { columns: 2; }
   .work-gallery-page .layout-controls { display: none; }
