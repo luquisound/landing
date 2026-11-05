@@ -37,9 +37,18 @@ Its prepared configuration runs the Worker first for `/`, `/*.html` and
 `/assets/*.mp4`, while other approved assets are served directly with the same
 security headers. Before deploying this configuration, create and verify the
 free canonical redirect rule described in the [frontend guide](docs/frontend.md).
-Deployment remains a separate, explicitly authorized operation using an
-authenticated Wrangler CLI (validated with version 4.157.0). No runtime
-dependencies, secrets, database or paid plan are required for this landing.
+Pushes to `main` automatically deploy through GitHub Actions after both CI jobs
+pass: publication/site checks and unit/Chromium tests. The deploy job builds
+the approved bundle, checks it with a Wrangler dry run, then publishes with the
+lockfile-installed Wrangler. Main-branch runs are serialized without cancelling
+an active deployment. Pull requests and manual CI runs do not deploy. CodeQL
+runs independently and is not a deployment gate.
+
+Activation requires the private Actions repository secret `CLOUDFLARE_API_TOKEN`;
+see the [frontend guide](docs/frontend.md#automatic-deployment). Verify the first
+successful deployment before reporting activation. Authorized pushes to `main`
+then publish the landing automatically. No runtime dependencies, application
+secrets, database or paid plan are required for this landing.
 
 ## Verification
 
@@ -56,4 +65,4 @@ for focused commands and the remaining manual checks.
 
 Only files listed in `public-files.json` are approved for publication.
 See the [security baseline](docs/security-baseline.md) before changing delivery
-or infrastructure. Repository delivery does not deploy the website.
+or infrastructure. A push to `main` triggers the deployment described above.

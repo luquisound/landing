@@ -6,7 +6,16 @@ The exact paths in `public-files.json` define the repository publication boundar
 
 The selected website integration was authorized for `main`. New assets, client/vehicle identities, visible plates, audio tracks and business claims still require explicit approval. Review metadata and prepare public copies with appropriate sanitization. The selected video derivatives are silent, and the complete vertical workshop derivative masks personal plates in three shots. Keep private provenance in local/private storage. Updating the manifest or ignore rules remains a publication decision; repository delivery does not authorize a deployment.
 
-No secrets are needed for the initial CI. Browser code must never contain private credentials; environment variable prefixes or obscured strings do not make browser-delivered secrets private. Avoid uploading CI artifacts containing private files. The guard detects a limited set of common credential patterns and does not validate arbitrary secrets or media rights. Treat every Git object, commit author, issue, PR and log as potentially public.
+Verification jobs need no secrets. The automatic deployment uses a dedicated
+Cloudflare token from an Actions repository secret, exposed only to the final
+deploy step on pushes to `main` after CI succeeds. Pull requests and manual CI
+runs never deploy. CodeQL runs independently and is not a deployment gate.
+Browser code must never contain private credentials; environment variable
+prefixes or obscured strings do not make browser-delivered secrets private.
+Avoid uploading CI artifacts containing private files. The guard detects a
+limited set of common credential patterns and does not validate arbitrary
+secrets or media rights. Treat every Git object, commit author, issue, PR and
+log as potentially public.
 
 ## Implemented locally
 
@@ -98,8 +107,14 @@ when the request uses HTTP or the `www` host. Redirect permanently to HTTPS on
 the apex, preserving path and query. Do not match the private quotation app or
 other subdomains. Exclude `/index.html` so the Worker retains its single-hop
 redirect to `/`. This prerequisite preserves canonical redirects for resources
-that bypass the Worker. This configuration still requires an explicitly
-authorized deployment and verification.
+that bypass the Worker. Authorized pushes to `main` deploy only after the
+publication/site checks, unit tests, Chromium flows, fresh approved build and
+Worker dry run succeed. The lockfile-installed Wrangler retains the existing
+Custom Domains and redirect rule without DNS or zone-edit permissions. Its
+dedicated token is restricted to Workers editing in the existing account;
+Custom Domains currently do not support per-Worker token scoping. Keep it in
+the private `CLOUDFLARE_API_TOKEN` Actions repository secret, never in the public
+tree or build. Activation requires that secret and a verified first deployment.
 
 ## References
 

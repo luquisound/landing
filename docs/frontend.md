@@ -154,8 +154,8 @@ preservation:
 (http.host in {"luquisound.com" "www.luquisound.com"} and http.request.method in {"GET" "HEAD"} and (not ssl or http.host eq "www.luquisound.com") and http.request.uri.path ne "/index.html")
 ```
 
-Preparing this configuration does not publish it; a deployment still requires
-explicit authorization.
+Preparing this configuration does not publish it. An authorized push to `main`
+triggers the automatic deployment described below.
 
 Verify the full suite, canonical redirects, real missing-file responses, video
 byte ranges and contact flows before an authorized deployment. Include direct
@@ -180,3 +180,32 @@ Production acceptance passed all 18 Chromium desktop/mobile flow tests,
 158 security/redirect/method checks and 72 checks across the 12 approved videos.
 Both home videos loaded and advanced without browser errors. Physical
 Safari/iPhone acceptance was not performed for this change.
+
+## Automatic deployment
+
+The CI workflow deploys `luquisound-landing` only on pushes to `main`, after
+`public-boundary` and `tests` succeed. These jobs check the approved publication
+boundary, site references, unit tests and Chromium desktop/mobile flows. CodeQL
+runs independently and is not a deployment gate. Pull requests and manual CI
+runs never deploy. Main-branch CI runs are serialized without cancelling an
+active deployment.
+
+The deploy job installs locked development dependencies without install scripts,
+builds a fresh `dist/` from approved manifest entries and checks the generated
+Worker with `wrangler deploy --dry-run --strict`. Only the final
+`wrangler deploy --strict` step receives `CLOUDFLARE_API_TOKEN` from the private
+Actions repository secret of that name. Keep the token out of source, chat and
+logs. GitHub's workflow token retains only `contents: read`.
+
+Use a dedicated Cloudflare token with Workers editing permission restricted to
+the existing account. The existing Custom Domains currently prevent per-Worker
+token scoping; no DNS, zone-edit, database or billing permission is needed to
+retain those connections. Configure the secret through GitHub repository
+Settings > Secrets and variables > Actions. Do not use local Wrangler OAuth
+credentials as a repository secret. Confirm the first successful Actions deploy
+and the canonical host before reporting activation.
+
+The deployment retains `dist/site` as the sole assets directory, generated
+security headers, selective Worker routing, disabled workers.dev/preview URLs,
+the existing canonical redirect rule and Workers Free. It does not administer
+DNS, redirect rules, the private quotation app or supplier services.
