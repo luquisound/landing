@@ -1,6 +1,6 @@
 # Luquisound
 
-Static website for Luquisound. Under development.
+Static website for Luquisound at https://luquisound.com/.
 
 ## Local development
 
@@ -17,8 +17,24 @@ Start the loopback-only preview; the server prints its local URL:
 npm run preview
 ```
 
-The website needs no build step or runtime dependencies. Playwright is used
+Local preview needs no build step or runtime dependencies. Playwright is used
 only for development checks.
+
+## Hosting
+
+Cloudflare Workers serves the public landing separately from the private
+quotation app at `cotizador.luquisound.com`. HTTP and `www` redirect to
+`https://luquisound.com/`, preserving paths and query parameters.
+
+Run `npm run build` to prepare a fresh `dist/` directory. Its `site/` subdirectory
+contains only approved website entries from `public-files.json`; the generated
+server entry stays outside the served assets. The command refuses an existing
+output directory; an optional fresh path can be passed with `npm run build --
+<output-directory>`. Never deploy the raw repository or `site/` directory.
+`wrangler.json` describes the landing Worker and its two custom domains.
+Deployment remains a separate, explicitly authorized operation using an
+authenticated Wrangler CLI (validated with version 4.157.0). No runtime
+dependencies, secrets, database or paid plan are required for this landing.
 
 ## Verification
 

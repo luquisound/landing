@@ -68,7 +68,25 @@ These admin controls need the repository owner's session or an appropriately sco
 
 ## Delivery and hosting
 
-The infrastructure does not configure GitHub Pages, Vercel, DNS or any production environment. The buildless local studies remain usable locally. Select the production stack and approved public media before preparing a deployable directory. Serve only that approved directory, with HTTPS and reviewed CSP, framing, referrer, permissions and MIME-sniffing policies. Do not deploy the repository root or the documentary library. Any future deployments must be separately authorized and verified.
+The selected public host is Cloudflare Workers Free at `luquisound.com`, with
+`www.luquisound.com` redirecting to the apex and HTTP navigation upgrading to
+HTTPS. It is a separate Worker from the private quotation app; the landing has
+no credentials, database or API bindings. Workers.dev and preview URLs are
+disabled. Existing Vercel project linkage is not used for landing delivery.
+
+`scripts/build-site.mjs` copies only exact approved `site/` manifest entries to a
+fresh output directory's `site/` child, validating content and rejecting linked
+source paths. A generated server entry with approved video lengths stays outside
+that served child; no metadata endpoint is published.
+Do not deploy the raw `site/`, repository root or documentary library: ignored
+local media can exist beside approved assets. `wrangler.json` serves that
+prepared directory through `scripts/site-worker.mjs`, which enforces canonical
+redirects, read-only methods and CSP, framing, referrer, permissions and
+MIME-sniffing headers. Static asset lookup retains real 404s without SPA fallback.
+The Worker streams one video byte range per request because the static asset
+binding ignores Range requests. HTML responses retain `no-transform` to
+prevent automatic third-party script injection conflicting with the site's CSP.
+Future deployments still require explicit authorization and verification.
 
 ## References
 

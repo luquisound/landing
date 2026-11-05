@@ -2,8 +2,8 @@
 
 The static website is in `site/`. Use Node.js 22 and run `npm run preview` to
 open a loopback-only preview. The server prints its URL and serves only the
-website paths listed individually in `public-files.json`. No build step or
-runtime dependencies are required.
+website paths listed individually in `public-files.json`. Local preview requires
+no build step or runtime dependencies.
 
 ## Brand assets
 
@@ -103,15 +103,39 @@ The idea is optional; empty ideas are omitted from the message. Submitting
 prepares a message locally and opens WhatsApp directly, preserving the form
 values for further edits. The visitor sends the message from the chat; there
 is no backend or automatic message delivery.
-Repository delivery does not deploy the website.
+Repository delivery does not deploy the website automatically.
 
-## Before launch
+## Production domain and delivery
 
-Keep `noindex,nofollow` during development. With the final domain and approved
-public media in place, review indexability on all four pages, canonical URLs,
-page titles/descriptions, social previews, a sitemap and confirmed business data.
+The public origin is `https://luquisound.com`. All four pages use absolute
+canonical URLs and permit indexing; `robots.txt` advertises the four-page
+sitemap. Existing `.html` navigation paths are preserved, while `/index.html`,
+HTTP and `www` redirect permanently to the canonical HTTPS URL, retaining query
+parameters. The private quotation app remains on its own subdomain.
 
-Prepare only the approved public directory for hosting. Verify HTTPS and
-production security headers as described in the [security baseline](security-baseline.md).
-Measure media delivery on the final host and check contact destinations and
-selected media privacy manually. Deployment requires separate authorization.
+Run `npm run build` with a fresh output directory to package only approved
+manifest entries. The default is `dist/`; an optional fresh destination can be
+passed as a command argument. Website assets are isolated in its `site/` child;
+the generated Worker entry includes approved video lengths without exposing
+server metadata as an asset. `wrangler.json` deploys the prepared assets and
+the small `scripts/site-worker.mjs` handler to Cloudflare Workers Free, with
+workers.dev and previews disabled. The Worker adds the production security
+headers described in the [security baseline](security-baseline.md). Its CSP
+allows same-origin resources and hashes the existing home-page no-JavaScript
+style; no inline-script or general inline-style exception is enabled.
+HTML also uses `no-transform` to prevent automatic analytics-script injection.
+Video byte ranges are sliced as streams in the Worker, including suffix and
+open-ended ranges, without buffering whole files. `If-Range` requires a matching
+strong ETag; other validators fall back to the full representation.
+
+Verify the full suite, canonical redirects, real missing-file responses, video
+byte ranges and contact flows before an authorized deployment. Check media and
+contact destinations on the final host without sending a consultation.
+Social preview enhancements and physical-device acceptance remain separate.
+
+The November 4, 2026 domain activation uses Worker version
+`50498117-2f97-4af9-bd31-7f0041c85e6b`. Live acceptance passed all 18 Chromium
+desktop/mobile flow tests, HTTPS and canonical redirects, and exact prefix/suffix
+byte ranges for all 12 approved videos. Both home videos loaded and played without
+browser errors. Ignored media, configuration and generated server metadata return
+404. Physical Safari/iPhone acceptance was not performed.

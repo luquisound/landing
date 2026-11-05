@@ -5,6 +5,7 @@ import { open, realpath } from 'node:fs/promises';
 const textExtensions = new Set(['.md', '.mjs', '.json', '.yml']);
 const rootFiles = new Set(['.gitignore', '.gitattributes', '.editorconfig', '.github/CODEOWNERS']);
 const frontendPath = /^site\/[A-Za-z0-9][A-Za-z0-9._-]*\.(?:html|css|js)$/;
+const discoveryPaths = new Set(['site/robots.txt', 'site/sitemap.xml']);
 const mediaPath = /^site\/assets\/[A-Za-z0-9][A-Za-z0-9._-]*\.(?:jpg|png|mp4)$/;
 const vectorPaths = new Set(['site/assets/logo.svg', 'site/assets/logo-vertical.svg',
   'site/assets/monogram.svg', 'site/assets/favicon.svg']);
@@ -268,7 +269,7 @@ export function pathIssues(file) {
     issues.push('private or generated directory');
   }
   if (parts.some((p) => /^provenance\.md$/i.test(p))) issues.push('private provenance');
-  const approvedFrontend = frontendPath.test(file) || mediaFileSizeLimit(file) !== undefined;
+  const approvedFrontend = frontendPath.test(file) || discoveryPaths.has(file) || mediaFileSizeLimit(file) !== undefined;
   const infrastructure = !parts.some((part) => part.toLowerCase() === 'site')
     && (rootFiles.has(file) || textExtensions.has(path.posix.extname(file)));
   if (!approvedFrontend && !infrastructure) issues.push('unapproved file type or publication location');

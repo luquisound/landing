@@ -44,6 +44,7 @@ test('rejects private, generated, noncanonical and media paths even if added to 
     'docs\\a.md', 'assets/photo.jpg', 'assets/video.mp4', 'credentials.pem',
     'site/assets/PROVENANCE.md', 'site/notes.md', 'site/nested/app.js', 'site/assets/app.js',
     'site/index.mjs', 'site/assets/video.mov', 'Site/index.html', 'docs/app.js',
+    'site/other.txt', 'site/other.xml', 'site/nested/robots.txt',
     'site/assets/other.svg', 'site/assets/other.woff2', 'site/assets/other.txt',
     'site/assets/nested/logo.svg', 'docs/logo.svg', 'docs/font.woff2',
     '.vercel/project.json', 'library/notes.md', 'docs/file:private.md', 'docs/*.md', 'docs/[a].md']) {
@@ -59,7 +60,8 @@ test('accepts public infrastructure paths', () => {
 
 test('allows direct frontend files and media only inside the reviewed site locations', () => {
   for (const file of ['preview.mjs', 'site/index.html', 'site/styles.css', 'site/app.js',
-    'site/work-gallery.js', 'site/assets/photo.jpg', 'site/assets/logo.png', 'site/assets/workshop.mp4']) {
+    'site/work-gallery.js', 'site/robots.txt', 'site/sitemap.xml',
+    'site/assets/photo.jpg', 'site/assets/logo.png', 'site/assets/workshop.mp4']) {
     assert.deepEqual(pathIssues(file), [], file);
   }
   assert.deepEqual(manifestIssues(['public-files.json', 'site/index.html', 'site/assets/photo.jpg']), []);

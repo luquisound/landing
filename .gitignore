@@ -11,6 +11,7 @@
 !/package-lock.json
 !/playwright.config.mjs
 !/public-files.json
+!/wrangler.json
 !/.github/
 !/docs/
 !/scripts/
@@ -33,9 +34,12 @@
 !/scripts/check-public.mjs
 !/scripts/public-policy.mjs
 !/scripts/check-site.mjs
+!/scripts/build-site.mjs
+!/scripts/site-worker.mjs
 /tests/*
 !/tests/public-policy.test.mjs
 !/tests/site-content.test.mjs
+!/tests/site-hosting.test.mjs
 !/tests/browser/
 /tests/browser/*
 !/tests/browser/site.spec.mjs
@@ -70,6 +74,8 @@ coverage/
 !/site/servicios.html
 !/site/trabajos.html
 !/site/contacto.html
+!/site/robots.txt
+!/site/sitemap.xml
 !/site/contact.css
 !/site/styles.css
 !/site/app.js
