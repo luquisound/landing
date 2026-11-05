@@ -117,10 +117,19 @@ Run `npm run build` with a fresh output directory to package only approved
 manifest entries. The default is `dist/`; an optional fresh destination can be
 passed as a command argument. Website assets are isolated in its `site/` child;
 the generated Worker entry includes approved video lengths without exposing
-server metadata as an asset. `wrangler.json` deploys the prepared assets and
-the small `scripts/site-worker.mjs` handler to Cloudflare Workers Free, with
-workers.dev and previews disabled. The Worker adds the production security
-headers described in the [security baseline](security-baseline.md). Its CSP
+server metadata as an asset. The build also generates `_headers` from the same
+security policy used by `scripts/site-worker.mjs`; this configuration is parsed
+by Static Assets rather than served as content. No additional source assets or
+publication allowlist entries are needed.
+
+`wrangler.json` prepares the assets and handler for Cloudflare Workers Free,
+with workers.dev and previews disabled. Selective `run_worker_first` patterns
+`/`, `/*.html` and `/assets/*.mp4` preserve Worker handling for HTML and videos.
+Other approved resources, including CSS, JavaScript, images and fonts, are
+served directly without invoking the Worker. Their generated `_headers` rules
+retain the production security headers described in the
+[security baseline](security-baseline.md). The Worker retains its read-only
+method checks, canonical redirects and real missing-file responses. Its CSP
 allows same-origin resources and hashes the existing home-page no-JavaScript
 style; no inline-script or general inline-style exception is enabled.
 HTML also uses `no-transform` to prevent automatic analytics-script injection.
@@ -128,8 +137,29 @@ Video byte ranges are sliced as streams in the Worker, including suffix and
 open-ended ranges, without buffering whole files. `If-Range` requires a matching
 strong ETag; other validators fall back to the full representation.
 
+Before deploying selective routing, create and verify a free Cloudflare Single
+Redirect rule limited to GET and HEAD requests for exactly `luquisound.com` and
+`www.luquisound.com`. Match HTTP or the `www` host and redirect permanently to
+`https://luquisound.com`, preserving the original path and query string. This
+rule must exclude `cotizador.luquisound.com` and all other subdomains. It is
+required because resources served directly no longer reach the Worker's
+canonical redirects. Exclude `/index.html` so the Worker retains its existing
+single-hop redirect to `/`, including requests using HTTP or `www`.
+
+Use this match expression, status `308`, target expression
+`concat("https://luquisound.com", http.request.uri.path)` and enable query-string
+preservation:
+
+```text
+(http.host in {"luquisound.com" "www.luquisound.com"} and http.request.method in {"GET" "HEAD"} and (not ssl or http.host eq "www.luquisound.com") and http.request.uri.path ne "/index.html")
+```
+
+Preparing this configuration does not publish it; a deployment still requires
+explicit authorization.
+
 Verify the full suite, canonical redirects, real missing-file responses, video
-byte ranges and contact flows before an authorized deployment. Check media and
+byte ranges and contact flows before an authorized deployment. Include direct
+asset security headers and HTTP/`www` asset redirects. Check media and
 contact destinations on the final host without sending a consultation.
 Social preview enhancements and physical-device acceptance remain separate.
 
@@ -139,3 +169,14 @@ desktop/mobile flow tests, HTTPS and canonical redirects, and exact prefix/suffi
 byte ranges for all 12 approved videos. Both home videos loaded and played without
 browser errors. Ignored media, configuration and generated server metadata return
 404. Physical Safari/iPhone acceptance was not performed.
+
+The static-routing reduction is active in Worker version
+`43b33198-fe2c-4708-a742-99338562d885`, serving 100% of traffic. Cloudflare's
+runtime configuration confirms direct asset delivery with the shared security
+headers and selective Worker handling for HTML and MP4. The free
+`luquisound_landing_canonical` Single Redirect rule is enabled with the match
+and target above; the quotation app remains outside its scope.
+Production acceptance passed all 18 Chromium desktop/mobile flow tests,
+158 security/redirect/method checks and 72 checks across the 12 approved videos.
+Both home videos loaded and advanced without browser errors. Physical
+Safari/iPhone acceptance was not performed for this change.

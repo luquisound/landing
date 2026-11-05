@@ -7,13 +7,20 @@ const contentSecurityPolicy = [
   "frame-src 'none'", "form-action 'self'",
 ].join('; ');
 
+export const STATIC_ASSET_HEADERS = Object.freeze({
+  'Content-Security-Policy': contentSecurityPolicy,
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Strict-Transport-Security': 'max-age=31536000',
+});
+
 function secureResponse(response, url) {
   const result = new Response(response.body, response);
-  result.headers.set('Content-Security-Policy', contentSecurityPolicy);
-  result.headers.set('X-Content-Type-Options', 'nosniff');
-  result.headers.set('X-Frame-Options', 'DENY');
-  result.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  result.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  for (const [name, value] of Object.entries(STATIC_ASSET_HEADERS)) {
+    if (name !== 'Strict-Transport-Security' || url.protocol === 'https:') result.headers.set(name, value);
+  }
   if (result.headers.get('Content-Type')?.startsWith('text/html')) {
     // Prevent zone-level analytics injection into the approved static pages.
     const cacheControl = result.headers.get('Cache-Control') ?? 'public, max-age=0, must-revalidate';
@@ -21,7 +28,6 @@ function secureResponse(response, url) {
       result.headers.set('Cache-Control', `${cacheControl}, no-transform`);
     }
   }
-  if (url.protocol === 'https:') result.headers.set('Strict-Transport-Security', 'max-age=31536000');
   return result;
 }
 

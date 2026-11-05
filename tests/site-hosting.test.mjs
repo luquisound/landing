@@ -7,7 +7,7 @@ import test from 'node:test';
 import { buildSite } from '../scripts/build-site.mjs';
 import worker from '../scripts/site-worker.mjs';
 
-test('production bundle contains only approved site files and never replaces existing output', async () => {
+test('production bundle contains approved files and generated security headers without replacing existing output', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'luquisound-build-test-'));
   const output = path.join(root, 'bundle');
   const video = Buffer.alloc(24);
@@ -21,6 +21,7 @@ test('production bundle contains only approved site files and never replaces exi
     ['site/assets/selected.mp4', video],
     ['site/assets/workshop.mp4', 'private unapproved video'],
     ['site/secret.html', 'private unapproved page'],
+    ['site/_headers', '/*\n  Content-Security-Policy: default-src *\n'],
     ['scripts/site-worker.mjs', 'export default { fetch(request, env) { return new Response(JSON.stringify({ lengths: env.VIDEO_LENGTHS, inherited: env.inherited })); } };'],
   ];
   try {
@@ -31,9 +32,25 @@ test('production bundle contains only approved site files and never replaces exi
     assert.equal(result.files, 3);
     assert.equal(result.assets, path.join(output, 'site'));
     assert.deepEqual((await readdir(output)).sort(), ['site', 'worker.mjs']);
-    assert.deepEqual((await readdir(result.assets)).sort(), ['app.js', 'assets', 'index.html']);
+    assert.deepEqual((await readdir(result.assets)).sort(), ['_headers', 'app.js', 'assets', 'index.html']);
     assert.deepEqual(await readdir(path.join(result.assets, 'assets')), ['selected.mp4']);
     assert.equal(await readFile(path.join(result.assets, 'index.html'), 'utf8'), fixture[1][1]);
+    const [headerPath, ...headerLines] = (await readFile(path.join(result.assets, '_headers'), 'utf8')).trimEnd().split('\n');
+    assert.equal(headerPath, '/*');
+    const staticHeaders = new Headers(headerLines.map((line) => {
+      const match = /^  ([^:]+): (.+)$/.exec(line);
+      assert.ok(match, `Invalid generated header: ${line}`);
+      return [match[1], match[2]];
+    }));
+    const protectedAsset = await worker.fetch(new Request('https://luquisound.com/app.js'), {
+      ASSETS: { fetch() { return new Response(fixture[2][1], { headers: { 'Content-Type': 'text/javascript' } }); } },
+    });
+    assert.deepEqual([...staticHeaders.keys()], [
+      'content-security-policy', 'permissions-policy', 'referrer-policy',
+      'strict-transport-security', 'x-content-type-options', 'x-frame-options',
+    ]);
+    for (const [name, value] of staticHeaders) assert.equal(value, protectedAsset.headers.get(name), name);
+    await protectedAsset.body.cancel();
     const generated = (await import(pathToFileURL(path.join(output, 'worker.mjs')).href)).default;
     const metadata = await generated.fetch(new Request('https://luquisound.com/'), { inherited: 'binding' });
     assert.deepEqual(await metadata.json(), { lengths: { '/assets/selected.mp4': video.length }, inherited: 'binding' });
@@ -42,7 +59,7 @@ test('production bundle contains only approved site files and never replaces exi
     assert.equal(await readFile(path.join(output, 'unrelated.txt'), 'utf8'), 'preserve existing output');
     await unlink(path.join(output, 'unrelated.txt'));
   } finally {
-    for (const file of ['site/app.js', 'site/index.html', 'site/assets/selected.mp4', 'worker.mjs']) {
+    for (const file of ['site/_headers', 'site/app.js', 'site/index.html', 'site/assets/selected.mp4', 'worker.mjs']) {
       await unlink(path.join(output, ...file.split('/'))).catch((error) => { if (error.code !== 'ENOENT') throw error; });
     }
     for (const directory of ['site/assets', 'site']) {
@@ -55,6 +72,26 @@ test('production bundle contains only approved site files and never replaces exi
     await rmdir(path.join(root, 'scripts'));
     await rmdir(root);
   }
+});
+
+test('production routing keeps HTML and videos in the Worker while ordinary approved assets bypass it', async () => {
+  const config = JSON.parse(await readFile(new URL('../wrangler.json', import.meta.url), 'utf8'));
+  const manifest = JSON.parse(await readFile(new URL('../public-files.json', import.meta.url), 'utf8'));
+  const patterns = config.assets.run_worker_first;
+  assert.ok(Array.isArray(patterns), 'Worker-first routing must be selective.');
+  const workerRoutes = patterns.map((pattern) => {
+    assert.match(pattern, /^\//);
+    const escaped = pattern.split('*').map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+    return new RegExp(`^${escaped}$`);
+  });
+  const runsWorkerFirst = (pathname) => workerRoutes.some((route) => route.test(pathname));
+  assert.equal(runsWorkerFirst('/'), true);
+  for (const file of manifest.filter((entry) => entry.startsWith('site/'))) {
+    const pathname = `/${file.slice('site/'.length)}`;
+    assert.equal(runsWorkerFirst(pathname), /\.(?:html|mp4)$/.test(file), pathname);
+  }
+  assert.equal(config.assets.html_handling, 'none');
+  assert.equal(config.assets.not_found_handling, 'none');
 });
 
 test('production bundle rejects manifest paths redirected through a directory link', async (context) => {

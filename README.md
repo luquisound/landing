@@ -27,11 +27,16 @@ quotation app at `cotizador.luquisound.com`. HTTP and `www` redirect to
 `https://luquisound.com/`, preserving paths and query parameters.
 
 Run `npm run build` to prepare a fresh `dist/` directory. Its `site/` subdirectory
-contains only approved website entries from `public-files.json`; the generated
-server entry stays outside the served assets. The command refuses an existing
-output directory; an optional fresh path can be passed with `npm run build --
+contains approved website entries from `public-files.json` and a generated
+`_headers` configuration; the generated server entry stays outside the served
+assets. The command refuses an existing output directory; an optional fresh
+path can be passed with `npm run build --
 <output-directory>`. Never deploy the raw repository or `site/` directory.
 `wrangler.json` describes the landing Worker and its two custom domains.
+Its prepared configuration runs the Worker first for `/`, `/*.html` and
+`/assets/*.mp4`, while other approved assets are served directly with the same
+security headers. Before deploying this configuration, create and verify the
+free canonical redirect rule described in the [frontend guide](docs/frontend.md).
 Deployment remains a separate, explicitly authorized operation using an
 authenticated Wrangler CLI (validated with version 4.157.0). No runtime
 dependencies, secrets, database or paid plan are required for this landing.

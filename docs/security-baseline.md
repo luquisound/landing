@@ -76,17 +76,30 @@ disabled. Existing Vercel project linkage is not used for landing delivery.
 
 `scripts/build-site.mjs` copies only exact approved `site/` manifest entries to a
 fresh output directory's `site/` child, validating content and rejecting linked
-source paths. A generated server entry with approved video lengths stays outside
-that served child; no metadata endpoint is published.
+source paths. It generates `_headers` from the Worker's security policy without
+copying a source sidecar or expanding the publication allowlist. Static Assets
+parses this configuration rather than serving it as content. A generated server
+entry with approved video lengths stays outside that served child; no metadata
+endpoint is published.
 Do not deploy the raw `site/`, repository root or documentary library: ignored
-local media can exist beside approved assets. `wrangler.json` serves that
-prepared directory through `scripts/site-worker.mjs`, which enforces canonical
-redirects, read-only methods and CSP, framing, referrer, permissions and
-MIME-sniffing headers. Static asset lookup retains real 404s without SPA fallback.
+local media can exist beside approved assets. The prepared `wrangler.json`
+configuration runs `scripts/site-worker.mjs` first for `/`, `/*.html` and
+`/assets/*.mp4`. Other approved resources are served directly by Static Assets,
+with the generated `_headers` preserving CSP, HSTS, framing, referrer,
+permissions and MIME-sniffing protection. Worker responses use that same policy
+and retain canonical redirects and read-only methods. Static asset lookup
+retains real 404s without SPA fallback.
 The Worker streams one video byte range per request because the static asset
 binding ignores Range requests. HTML responses retain `no-transform` to
 prevent automatic third-party script injection conflicting with the site's CSP.
-Future deployments still require explicit authorization and verification.
+Before deploying selective routing, create and verify a free Single Redirect
+rule for GET/HEAD requests to exactly `luquisound.com` or `www.luquisound.com`
+when the request uses HTTP or the `www` host. Redirect permanently to HTTPS on
+the apex, preserving path and query. Do not match the private quotation app or
+other subdomains. Exclude `/index.html` so the Worker retains its single-hop
+redirect to `/`. This prerequisite preserves canonical redirects for resources
+that bypass the Worker. This configuration still requires an explicitly
+authorized deployment and verification.
 
 ## References
 

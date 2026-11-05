@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fileContentIssues, manifestIssues, mediaFileSizeLimit, pathIssues,
   readPublicBytes } from './public-policy.mjs';
+import { STATIC_ASSET_HEADERS } from './site-worker.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -36,6 +37,9 @@ export async function buildSite({ root = repositoryRoot, output = path.join(root
     if (path.extname(file) === '.mp4') videoLengths[`/${relative}`] = bytes.length;
     bytesWritten += bytes.length;
   }
+  const headers = '/*\n' + Object.entries(STATIC_ASSET_HEADERS)
+    .map(([name, value]) => `  ${name}: ${value}\n`).join('');
+  await writeFile(path.join(assets, '_headers'), headers, { flag: 'wx' });
   let workerImport = path.relative(output, path.join(root, 'scripts', 'site-worker.mjs')).split(path.sep).join('/');
   if (!workerImport.startsWith('.')) workerImport = `./${workerImport}`;
   const worker = `import worker from ${JSON.stringify(workerImport)};\n`
