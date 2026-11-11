@@ -30,6 +30,7 @@ export async function checkSite({ root = repositoryRoot, manifest } = {}) {
   const references = [];
   const services = new Set();
   const galleryCards = [];
+  const catalogIds = new Set();
   const existing = new Map();
   const addReference = (file, value, attribute) => {
     if (!value || /^(?:https?:|mailto:|tel:|data:|\/\/)/i.test(value)) return;
@@ -41,7 +42,8 @@ export async function checkSite({ root = repositoryRoot, manifest } = {}) {
       }
       const pathname = decodeURIComponent(url.pathname);
       const target = `site${pathname === '/' ? '/index.html' : pathname}`;
-      references.push({ file, value, target, fragment: decodeURIComponent(url.hash.slice(1)), attribute });
+      references.push({ file, value, target, fragment: decodeURIComponent(url.hash.slice(1)), attribute,
+        caseId: target === 'site/trabajos.html' ? url.searchParams.get('trabajo') : null });
     } catch {
       issues.push(`${file}: invalid ${attribute} reference ${JSON.stringify(value)}`);
     }
@@ -134,6 +136,7 @@ export async function checkSite({ root = repositoryRoot, manifest } = {}) {
         continue;
       }
       caseIds.add(entry.id);
+      catalogIds.add(entry.id);
       const label = `site/cases.js (${entry.id})`;
       for (const field of ['categories', 'serviceRefs']) {
         const values = entry[field];
@@ -169,7 +172,7 @@ export async function checkSite({ root = repositoryRoot, manifest } = {}) {
       if (!caseIds.has(card.id)) issues.push(`${card.file}: unknown data-case ${JSON.stringify(card.id)}`);
     }
   }
-  for (const { file, value, target, fragment, attribute } of references) {
+  for (const { file, value, target, fragment, attribute, caseId } of references) {
     if (!approved.has(target)) {
       issues.push(`${file}: ${attribute} references unapproved path ${JSON.stringify(value)}`);
       continue;
@@ -178,6 +181,9 @@ export async function checkSite({ root = repositoryRoot, manifest } = {}) {
       existing.set(target, await stat(path.join(root, target)).then(info => info.isFile(), () => false));
     }
     if (!existing.get(target)) issues.push(`${file}: ${attribute} references missing file ${JSON.stringify(value)}`);
+    if (caseId && !catalogIds.has(caseId)) {
+      issues.push(`${file}: ${attribute} references unknown case ${JSON.stringify(caseId)}`);
+    }
     if (fragment && target.endsWith('.html') && !documents.get(target)?.ids.has(fragment)) {
       issues.push(`${file}: ${attribute} references missing anchor ${JSON.stringify(value)}`);
     }

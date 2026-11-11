@@ -83,6 +83,10 @@ HTTPS. It is a separate Worker from the private quotation app; the landing has
 no credentials, database or API bindings. Workers.dev and preview URLs are
 disabled. Existing Vercel project linkage is not used for landing delivery.
 
+The public prototype uses `noindex` metadata while allowing crawling. This
+search-engine instruction is not access control: all approved website content
+remains public and must continue to satisfy the publication boundary above.
+
 `scripts/build-site.mjs` copies only exact approved `site/` manifest entries to a
 fresh output directory's `site/` child, validating content and rejecting linked
 source paths. It generates `_headers` from the Worker's security policy without

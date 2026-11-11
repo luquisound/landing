@@ -91,6 +91,17 @@ test('rejects duplicate catalog ids and invalid service references', async t => 
   assert.match(issues, /serviceRefs must contain unique known service ids/);
 });
 
+test('case deep links must point to an existing catalog entry', async t => {
+  const valid = await fixture(t, { entries: {
+    'site/index.html': index + '<a href="trabajos.html?trabajo=example">Featured work</a>',
+  } });
+  assert.deepEqual(await checkSite(valid), []);
+  const invalid = await fixture(t, { entries: {
+    'site/index.html': index + '<a href="trabajos.html?trabajo=unknown">Featured work</a>',
+  } });
+  assert.match((await checkSite(invalid)).join('\n'), /references unknown case "unknown"/);
+});
+
 test('rejects catalog entries without a gallery card or valid media', async t => {
   const options = await fixture(t, { cases: [{ ...catalog[0], id: 'orphan', media: [] }] });
   const issues = (await checkSite(options)).join('\n');

@@ -2,6 +2,11 @@
 
 Static website for Luquisound at https://luquisound.com/.
 
+The landing remains a public prototype. All four pages use temporary `noindex`
+metadata until the official launch; crawling stays enabled so search engines
+can read it. See the [launch checks](docs/frontend.md#production-domain-and-delivery)
+before authorizing indexing.
+
 ## Local development
 
 Use Node.js 22. Install the development tools and Chromium once:

@@ -5,13 +5,16 @@ const navigation = document.getElementById("navigation");
 const menuToggle = document.getElementById("menu-toggle");
 const video = document.getElementById("hero-video");
 const hero = document.querySelector(".hero");
+const featuredWork = document.getElementById("trabajos-destacados");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const connection = navigator.connection;
 const serviceDialog = document.getElementById("service-dialog");
 const consultationForm = document.getElementById("consultation-form");
 const desktopNavigation = window.matchMedia("(min-width: 1000px)");
 const dialogOpeners = new WeakMap();
 let heroSource = "";
 let heroLoadFailed = false;
+let heroCovered = false;
 
 document.documentElement.classList.add("js");
 
@@ -33,6 +36,11 @@ if (header && navigation && menuToggle) {
   document.addEventListener("click", (event) => {
     if (menuToggle.getAttribute("aria-expanded") === "true" && !header.contains(event.target)) setMenu(false);
   });
+  header.addEventListener("focusout", () => {
+    queueMicrotask(() => {
+      if (!header.contains(document.activeElement)) setMenu(false);
+    });
+  });
   desktopNavigation.addEventListener("change", () => setMenu(false));
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
@@ -42,6 +50,13 @@ if (header && navigation && menuToggle) {
   });
   window.addEventListener("scroll", () => header.classList.toggle("is-scrolled", window.scrollY > 40), { passive: true });
   header.classList.toggle("is-scrolled", window.scrollY > 40);
+  const measureHeader = () => {
+    if (!header.classList.contains("menu-open")) {
+      document.documentElement.style.setProperty("--header-height", `${header.getBoundingClientRect().height}px`);
+    }
+  };
+  new ResizeObserver(measureHeader).observe(header);
+  measureHeader();
 }
 
 function syncDialogState() {
@@ -311,8 +326,17 @@ function applyMotionPreference() {
     heroSource = source;
     heroLoadFailed = false;
   }
-  hero.classList.toggle("hero-video-reduced", reducedMotion.matches || heroLoadFailed);
-  if (reducedMotion.matches || document.hidden || heroLoadFailed) {
+  const staticHero = reducedMotion.matches || Boolean(connection?.saveData);
+  hero.classList.toggle("hero-video-reduced", staticHero || heroLoadFailed);
+  if (staticHero) {
+    video.pause();
+    if (video.hasAttribute("src")) {
+      video.removeAttribute("src");
+      video.load();
+    }
+    return;
+  }
+  if (document.hidden || heroCovered || heroLoadFailed) {
     video.pause();
     return;
   }
@@ -334,8 +358,33 @@ if (video) {
     applyMotionPreference();
   });
   reducedMotion.addEventListener("change", applyMotionPreference);
+  connection?.addEventListener("change", applyMotionPreference);
   desktopNavigation.addEventListener("change", applyMotionPreference);
   document.addEventListener("visibilitychange", applyMotionPreference);
+  let heroFrame = 0;
+  function updateHeroCoverage() {
+    heroFrame = 0;
+    const heroRect = hero.getBoundingClientRect();
+    const workTop = featuredWork?.getBoundingClientRect().top ?? heroRect.bottom;
+    const viewportHeight = window.innerHeight;
+    const progress = reducedMotion.matches ? 0 : Math.max(0, Math.min(1, (viewportHeight - workTop) / viewportHeight));
+    const actionsBottom = hero.querySelector(".hero-actions")?.getBoundingClientRect().bottom ?? heroRect.bottom;
+    hero.inert = Boolean(featuredWork && workTop <= actionsBottom);
+    hero.style.setProperty("--hero-cover", String(progress));
+    const covered = heroRect.bottom <= 0 || heroRect.top >= viewportHeight || workTop <= (header?.getBoundingClientRect().bottom ?? 0) + 24;
+    if (covered !== heroCovered) {
+      heroCovered = covered;
+      applyMotionPreference();
+    }
+  }
+  function scheduleHeroCoverage() {
+    if (!heroFrame) heroFrame = requestAnimationFrame(updateHeroCoverage);
+  }
+  window.addEventListener("scroll", scheduleHeroCoverage, { passive: true });
+  window.addEventListener("resize", scheduleHeroCoverage);
+  window.addEventListener("pageshow", scheduleHeroCoverage);
+  reducedMotion.addEventListener("change", scheduleHeroCoverage);
+  updateHeroCoverage();
   applyMotionPreference();
 }
 
@@ -413,7 +462,6 @@ if (consultationForm) {
   const hasSelectedInterest = [...interestField.options].some(option => option.value === selectedInterest);
   if (hasSelectedInterest) interestField.value = selectedInterest;
   const contactShell = consultationForm.closest(".contact-shell");
-  const floatingNavigation = document.querySelector(".floating-nav");
   let consultationFocusFrame = 0;
   function keepConsultationFocusVisible(element) {
     cancelAnimationFrame(consultationFocusFrame);
@@ -424,10 +472,10 @@ if (consultationForm) {
       if (!rect.width || !rect.height) return;
       const viewportTop = window.visualViewport?.offsetTop ?? 0;
       const viewportBottom = viewportTop + (window.visualViewport?.height ?? window.innerHeight);
-      const navigationRect = floatingNavigation?.getBoundingClientRect();
-      const navigationVisible = navigationRect && navigationRect.bottom > viewportTop && navigationRect.top < viewportBottom;
-      const safeTop = viewportTop + 24;
-      const safeBottom = navigationVisible ? Math.min(viewportBottom - 24, navigationRect.top - 16) : viewportBottom - 24;
+      const headerRect = header?.getBoundingClientRect();
+      const headerVisible = headerRect && headerRect.bottom > viewportTop && headerRect.top < viewportBottom;
+      const safeTop = headerVisible ? Math.max(viewportTop + 24, headerRect.bottom + 16) : viewportTop + 24;
+      const safeBottom = viewportBottom - 24;
       if (rect.top >= safeTop && rect.bottom <= safeBottom) return;
       const desiredTop = safeTop + Math.max(0, (safeBottom - safeTop - rect.height) / 2);
       window.scrollBy({ top: rect.top - desiredTop, behavior: reducedMotion.matches ? "auto" : "smooth" });

@@ -1,5 +1,5 @@
 .contact-page .contact-shell { max-width: 1280px; }
-.contact-page .contact-shell :is(input, select, textarea, button, a) { scroll-margin-block: 24px calc(8rem + env(safe-area-inset-bottom)); }
+.contact-page .contact-shell :is(input, select, textarea, button, a) { scroll-margin-block: calc(var(--header-height, 90px) + 24px) 24px; }
 .contact-page .contact-introduction { margin-bottom: clamp(32px, 5vw, 56px); }
 .contact-page .contact-introduction h1 { max-width: 22ch; font-size: clamp(2rem, 4.5vw, 3.5rem); line-height: 1.15; text-wrap: balance; }
 .contact-page .contact-introduction p { max-width: 48ch; margin-top: 20px; color: var(--muted); font-size: 1.125rem; line-height: 1.6; }
@@ -9,6 +9,7 @@
 .contact-page .contact-fields { min-width: 0; padding: 0; margin: 0; border: 0; }
 .contact-page .contact-fields label { display: block; font-size: 1rem; margin-bottom: 8px; }
 .contact-page .contact-vehicle { display: grid; grid-template-columns: minmax(0, 1fr) calc(5ch + 26px); gap: 12px; }
+.contact-page .contact-vehicle > div { min-width: 0; }
 .contact-page .contact-fields input, .contact-page .contact-fields select, .contact-page .contact-fields textarea { display: block; width: 100%; min-width: 0; min-height: 48px; padding: 12px; margin-bottom: 24px; border: 1px solid var(--field-border); border-radius: var(--control-radius); background: var(--surface); color: var(--white); font-size: 1rem; line-height: 1.5; }
 .contact-page .contact-fields textarea { resize: vertical; }
 .contact-page .contact-fields input::placeholder, .contact-page .contact-fields textarea::placeholder { color: var(--muted); }
@@ -26,10 +27,6 @@
 .contact-page .contact-channels > div { border-top: 1px solid var(--line); padding-block: 16px; }
 .contact-page .contact-channels dt { color: var(--muted); font-size: .875rem; }
 .contact-page .contact-channels dd { margin: 4px 0 0; }
-@media (max-width: 699px) {
-  .contact-page .contact-shell { padding-bottom: 32px; }
-  .contact-page .floating-nav { position: static; transform: none; margin: 0 auto max(24px, calc(env(safe-area-inset-bottom) + 16px)); }
-}
 @media (min-width: 900px) {
   .contact-page .contact-content { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(48px, 6vw, 80px); }
   .contact-page .contact-fields > .button { width: auto; min-width: 240px; }

@@ -21,13 +21,19 @@ blocks are rejected by the publication guard.
 
 The home selects one video for the current viewport: a 25-second horizontal
 montage from 1000 px, or the complete vertical workshop sequence below that
-width. Both are silent and play without playback controls. Static posters,
-reduced-motion handling and hidden-document pausing are provided.
+width. Both are silent, loop and play without playback controls. Reduced motion
+and data-saving preferences use a static poster without requesting a video.
+Playback pauses while the document is hidden or the featured section covers the
+hero. Scrolling naturally brings three selected cases over the sticky hero,
+with a dark opacity transition rather than an expensive full-screen blur.
+The featured cards link directly to existing cases in Work.
+Keeping an infinite background video without a pause control is an intentional
+product choice; reduced motion alone does not establish WCAG 2.2.2 conformance.
 
 Services retain three pillars and link to related work.
 The Services index keeps three columns from 700 px and stacks on narrower
 screens. Image panels account for viewport height, headings, captions and the
-floating navigation. Short viewports scroll without clipping controls.
+shared top navigation. Short viewports scroll without clipping controls.
 Soundproofing explains benefits and treatment levels for doors, floors and
 roofs in native disclosure controls, with selected diagrams and HTML text.
 Door levels add treated surfaces; floor and roof levels add material layers.
@@ -41,11 +47,16 @@ exterior through the case's optional `workOnlyMedia` collection; shared service
 media remain unchanged. Prepared exterior framing is also used by both gallery
 thumbnails.
 Work opens with the Mustang and Silverado soundproofing cases, followed by
-the eight existing case collections, ten manually played clips and eight
-standalone photographs.
+the eight existing case collections. Each of the ten entries describes a
+specific intervention with its available photographs or manually played clips.
+Standalone photographs are no longer equivalent portfolio entries; their
+approved files remain available. Old standalone-photo URLs return to the
+filtered gallery, preserving the selected columns.
 Cases can belong to multiple filters. Case links, filters and columns restore
 through browser history. Video sources are released when their dialog closes
-or the selected media changes.
+or the selected media changes. Failed videos can be retried without changing
+the selected work or media. Modified arrow shortcuts remain available to the
+browser rather than changing the selected work.
 Service and Work dialogs use manual media carousels with previous/next controls,
 a position counter and horizontal swipes on photographs. Media navigation wraps
 within the selected work; Work navigation remains separate. Photographs retain
@@ -64,7 +75,7 @@ suite starts its own loopback preview and does not send messages or visit
 external contact destinations. Focused commands are:
 
 - `npm run check`: publication paths, file contents and index checks.
-- `npm run check:site`: internal resources and case/catalogue consistency.
+- `npm run check:site`: internal resources, case deep links and catalogue consistency.
 - `npm test`: unit and fixture-based regression tests.
 - `npm run test:browser`: consultation, history, dialogs and media smoke tests.
 
@@ -72,7 +83,9 @@ Automated checks complement the following manual coverage:
 
 - Run `npm run verify` and `git diff --check` before a commit.
 - Check mobile, tablet, desktop and ultrawide home framing, source selection,
-  reduced motion and poster fallback.
+  reduced motion, data saving, poster fallback and featured-section coverage.
+- Check the shared header, mobile menu, focus visibility and enlarged text in
+  narrow and landscape viewports, including the consultation button.
 - Check service links, case filters, direct case URLs, browser history,
   keyboard navigation, manual playback and media release.
 - Check carousel wraparound, rapid navigation, image failures, changing work or
@@ -94,10 +107,12 @@ in three shots. Contact details include the workshop location, opening hours
 and a direct WhatsApp link. Contact presents the consultation inline, followed
 by compact workshop details and alternative channels on smaller screens; wider
 screens use two columns. Valid service-interest links focus the vehicle field.
-On Contact at widths up to 699px, navigation follows the page content in normal
-flow so it cannot cover the consultation button. Other pages and wider Contact
-viewports retain floating navigation.
-The consultation keeps make/model and a required four-digit year in one row.
+All pages share a fixed top header and the same mobile menu. The header height
+is measured so enlarged text and wrapped navigation retain the correct content
+offset; focus scrolling accounts for the header. The consultation keeps
+make/model and a required four-digit year in one row, each with a visible label.
+The default interest is "Todavia no lo se" (Asesoramiento); valid service links
+still preselect their matching interest.
 The accepted years range from 1900 through the current calendar year.
 The idea is optional; empty ideas are omitted from the message. Submitting
 prepares a message locally and opens WhatsApp directly, preserving the form
@@ -109,8 +124,12 @@ Pushes to `main` automatically deploy the website to Cloudflare after the
 ## Production domain and delivery
 
 The public origin is `https://luquisound.com`. All four pages use absolute
-canonical URLs and permit indexing; `robots.txt` advertises the four-page
-sitemap. Existing `.html` navigation paths are preserved, while `/index.html`,
+canonical URLs and temporary `noindex` metadata while the site remains a
+prototype. Crawling remains allowed so search engines can read that instruction;
+`robots.txt` still advertises the four-page sitemap. Noindex is not access
+control and does not guarantee immediate removal from existing search results.
+Each page also provides Open Graph and Twitter-card metadata using approved
+images. Existing `.html` navigation paths are preserved, while `/index.html`,
 HTTP and `www` redirect permanently to the canonical HTTPS URL, retaining query
 parameters. The private quotation app remains on its own subdomain.
 
@@ -162,7 +181,14 @@ Verify the full suite, canonical redirects, real missing-file responses, video
 byte ranges and contact flows before an authorized deployment. Include direct
 asset security headers and HTTP/`www` asset redirects. Check media and
 contact destinations on the final host without sending a consultation.
-Social preview enhancements and physical-device acceptance remain separate.
+Check social previews and physical devices separately from automated Chromium.
+
+Before the official launch, review the selected cases and their descriptions,
+check the home video and form on a physical iPhone/Safari and Android device,
+and confirm the contact details and shared-link previews. Remove `noindex` from
+all four pages only when indexing is explicitly authorized, adjust its browser
+assertions and verify the deployed HTML before requesting indexing. Keep
+canonical URLs, crawling and the sitemap enabled throughout.
 
 The November 4, 2026 domain activation uses Worker version
 `50498117-2f97-4af9-bd31-7f0041c85e6b`. Live acceptance passed all 18 Chromium

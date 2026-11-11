@@ -11,6 +11,12 @@
   const video = document.getElementById("project-video");
   const mediaError = document.getElementById("project-media-error");
   const mediaSelector = document.getElementById("project-media-selector");
+  const videoRetry = document.createElement("button");
+  videoRetry.id = "project-video-retry";
+  videoRetry.type = "button";
+  videoRetry.className = "media-carousel-retry";
+  videoRetry.textContent = "Reintentar";
+  videoRetry.hidden = true;
   const mediaRegion = dialog?.querySelector(".project-visual");
   const mediaStage = dialog?.querySelector(".lightbox-stage");
   const mediaTitle = document.getElementById("project-media-title");
@@ -27,6 +33,7 @@
   const cases = new Map((window.LuquisoundCases || []).map(project => [project.id, project]));
   const categories = { all: "Todos los trabajos", audio: "Audio", insonorizacion: "Insonorización", personalizacion: "Personalización" };
   let activeCard = null;
+  let activeMediaIndex = 0;
   let revealObserver = null;
   let restoringHistory = false;
   let leavingPage = false;
@@ -66,7 +73,7 @@
       card.hidden = !matchesCategory(card, selectedCategory);
       if (!card.hidden && revealCards) card.classList.add("is-visible");
     });
-    if (status) status.textContent = `${categories[selectedCategory]}: ${visibleCards().length} trabajos y fotografías.`;
+    if (status) status.textContent = `${categories[selectedCategory]}: ${visibleCards().length} trabajos.`;
     const url = new URL(window.location.href);
     if (selectedCategory === "all") url.searchParams.delete("categoria");
     else url.searchParams.set("categoria", selectedCategory);
@@ -97,6 +104,8 @@
   }
 
   function releaseVideo() {
+    mediaError.hidden = true;
+    videoRetry.hidden = true;
     video.pause();
     if (video.hasAttribute("src")) {
       video.removeAttribute("src");
@@ -112,8 +121,9 @@
     image,
     controls: mediaSelector,
     error: mediaError,
-    onShow(media) {
+    onShow(media, index) {
       releaseVideo();
+      activeMediaIndex = index;
       mediaStage.dataset.mediaType = media.type;
       if (media.type === "video") {
         video.setAttribute("aria-label", media.alt || media.title);
@@ -124,6 +134,13 @@
       const type = media.type === "video" ? "Video" : "Foto";
       mediaTitle.textContent = media.title ? `${type} · ${media.title}` : type;
     }
+  });
+  mediaSelector.append(videoRetry);
+  videoRetry.addEventListener("click", async () => {
+    await carousel.show(activeMediaIndex);
+    if (video.hidden) return;
+    video.focus();
+    video.play().catch(() => {});
   });
 
   function releaseMedia() {
@@ -218,7 +235,9 @@
   previous.addEventListener("click", () => navigateProject(-1));
   next.addEventListener("click", () => navigateProject(1));
   dialog.addEventListener("keydown", event => {
-    if (event.defaultPrevented || event.target.closest("video") || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
+      || event.target.closest("video, input, select, textarea, [contenteditable]")
+      || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
     event.preventDefault();
     navigateProject(event.key === "ArrowLeft" ? -1 : 1);
   });
@@ -231,6 +250,13 @@
 
   function restoreLocation(revealCards = true) {
     const query = new URLSearchParams(window.location.search);
+    // Retired standalone-photo links return to the selected case gallery.
+    if (/^foto-\d+$/.test(query.get("trabajo"))) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("trabajo");
+      query.delete("trabajo");
+      window.history.replaceState(window.history.state, "", url);
+    }
     applyFilter(query.get("categoria"), false, revealCards);
     applyColumns(query.get("columnas"));
     const requestedCard = cards.find(card => cardId(card) === query.get("trabajo"));
@@ -273,7 +299,13 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) video.pause();
   });
-  video.addEventListener("error", () => { if (!video.hidden) mediaError.hidden = false; });
+  video.addEventListener("error", () => {
+    if (video.hidden || !dialog.open || !video.error) return;
+    mediaError.textContent = "No se pudo cargar el video. Podés reintentar o elegir otra pieza con las flechas.";
+    mediaError.hidden = false;
+    videoRetry.hidden = false;
+    mediaSelector.hidden = false;
+  });
 
   function applyMotionPreference() {
     revealObserver?.disconnect();

@@ -6,6 +6,16 @@
   <meta name="theme-color" content="#111110">
   <link rel="canonical" href="https://luquisound.com/contacto.html">
   <meta name="description" content="Hablemos de tu auto y de lo que querés mejorar.">
+  <meta name="robots" content="noindex">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Luquisound">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:title" content="Contacto — Luquisound">
+  <meta property="og:description" content="Hablemos de tu auto y de lo que querés mejorar.">
+  <meta property="og:url" content="https://luquisound.com/contacto.html">
+  <meta property="og:image" content="https://luquisound.com/assets/hero-desktop-poster.jpg">
+  <meta property="og:image:alt" content="Vehículos en el taller Luquisound">
+  <meta name="twitter:card" content="summary_large_image">
   <title>Contacto — Luquisound</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
@@ -14,6 +24,18 @@
 </head>
 <body class="inner-page contact-page">
   <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <header class="site-header" id="site-header">
+    <a class="header-brand" href="index.html" aria-label="Luquisound, inicio">
+      <img src="assets/monogram.svg" alt="Luquisound" width="4291" height="2450">
+    </a>
+    <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" hidden>Menú <span aria-hidden="true">+</span></button>
+    <nav class="navigation" id="navigation" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="trabajos.html">Trabajos</a>
+      <a class="nav-consult" href="contacto.html" aria-current="page">Contacto</a>
+    </nav>
+  </header>
 
   <main class="page-shell contact-shell" id="contenido">
     <header class="page-heading contact-introduction">
@@ -26,14 +48,18 @@
           <h2 id="consultation-title">Tu consulta</h2>
           <fieldset class="contact-fields" id="consultation-fields" disabled>
             <legend class="sr-only">Datos de tu consulta</legend>
-            <label for="vehicle">¿Qué auto tenés?</label>
             <div class="contact-vehicle">
-              <input id="vehicle" name="vehicle" type="text" placeholder="Marca y modelo" maxlength="100" autocomplete="off" required>
-              <label class="sr-only" for="vehicle-year">Año</label>
-              <input id="vehicle-year" name="year" type="text" placeholder="Año" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" title="Ingresá el año de tu auto en cuatro dígitos." autocomplete="off" required>
+              <div>
+                <label for="vehicle">¿Qué auto tenés?</label>
+                <input id="vehicle" name="vehicle" type="text" placeholder="Marca y modelo" maxlength="100" autocomplete="off" required>
+              </div>
+              <div>
+                <label for="vehicle-year">Año</label>
+                <input id="vehicle-year" name="year" type="text" placeholder="2015" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" title="Ingresá el año de tu auto en cuatro dígitos." autocomplete="off" required>
+              </div>
             </div>
             <label for="interest">¿Qué te interesa?</label>
-            <select id="interest" name="interest"><option value="Audio">Audio</option><option value="Insonorización">Insonorización</option><option value="Personalización">Personalización</option><option value="Asesoramiento">Todavía no lo sé</option></select>
+            <select id="interest" name="interest"><option value="Asesoramiento">Todavía no lo sé</option><option value="Audio">Audio</option><option value="Insonorización">Insonorización</option><option value="Personalización">Personalización</option></select>
             <label for="idea">Contanos tu idea (opcional)</label>
             <textarea id="idea" name="idea" placeholder="Qué te gustaría mejorar" rows="4" maxlength="600"></textarea>
             <button class="button button-yellow" id="whatsapp-consultation" type="submit" data-app-only hidden>Consultar por WhatsApp <span aria-hidden="true">↗</span></button>
@@ -57,11 +83,5 @@
     </div>
   </main>
 
-  <nav class="floating-nav" aria-label="Navegación principal">
-    <a href="index.html">Inicio</a>
-    <a href="servicios.html">Servicios</a>
-    <a href="trabajos.html">Trabajos</a>
-    <a class="nav-current nav-consult" href="contacto.html" aria-current="page">Contacto <span aria-hidden="true">↗</span></a>
-  </nav>
 </body>
 </html>

@@ -5,7 +5,7 @@ window.LuquisoundCases = [
     id: "ford-mustang-insonorizacion",
     title: "Ford Mustang",
     categories: ["insonorizacion"],
-    summary: "Una mirada al exterior del Mustang y al tratamiento de insonorización BRÜDER en el piso, el túnel central y la zona trasera del habitáculo.",
+    summary: "Insonorización del piso, el túnel central y la zona trasera del habitáculo con material BRÜDER. Las fotos recorren las superficies tratadas y el vehículo en el taller.",
     steps: ["Material de insonorización sobre el piso y el túnel central, con los asientos retirados.", "Detalles del tratamiento en la zona trasera del habitáculo.", "Vista exterior del Mustang en el taller."],
     serviceRefs: ["insonorizacion"],
     media: [
@@ -18,7 +18,7 @@ window.LuquisoundCases = [
     id: "chevrolet-silverado-insonorizacion",
     title: "Chevrolet Silverado",
     categories: ["insonorizacion"],
-    summary: "Una selección del proceso de insonorización de la cabina, con vistas del piso y del frente antes y después de colocar el material. Cierra con el exterior de la Silverado en el taller.",
+    summary: "Insonorización de la cabina: piso, túnel central y panel frontal. El proceso muestra la preparación de las superficies y la colocación del material, con el tablero retirado.",
     steps: ["Material de insonorización en el piso, el túnel central y la zona trasera.", "Frente de la cabina con el tablero retirado y el panel a la vista.", "Material colocado en el panel frontal de la cabina."],
     serviceRefs: ["insonorizacion"],
     media: [
@@ -35,7 +35,7 @@ window.LuquisoundCases = [
     id: "bmw-335i",
     title: "BMW 335i",
     categories: ["audio", "insonorizacion", "personalizacion"],
-    summary: "Colección de instalaciones y detalles del BMW 335i: audio, insonorización, iluminación y recorridos de exterior e interior.",
+    summary: "Audio, insonorización e iluminación en el BMW 335i. Recorremos el tratamiento de puertas, la integración de los equipos y las terminaciones del habitáculo.",
     steps: ["Puertas con material de insonorización y montaje de parlantes.", "Componentes bajo el asiento y equipos integrados en el baúl.", "Iluminación interior y cielo estrellado.", "Otros recorridos de exterior e interior de la colección."],
     serviceRefs: ["audio", "insonorizacion", "personalizacion"],
     media: [
@@ -49,7 +49,7 @@ window.LuquisoundCases = [
     id: "golf-r32",
     title: "Volkswagen Golf R32",
     categories: ["audio"],
-    summary: "Un montaje de audio que permite ver la terminación del baúl, el acceso a los equipos ocultos y el control desde el habitáculo.",
+    summary: "Audio integrado en el baúl, con subwoofer y un compartimento que permite acceder a los equipos. El controlador queda integrado en el habitáculo.",
     steps: ["Subwoofer y terminación del baúl.", "Compartimento de equipos accesible mediante una tapa.", "Control de audio integrado en el interior."],
     serviceRefs: ["audio"],
     media: [
@@ -61,7 +61,7 @@ window.LuquisoundCases = [
     id: "peugeot-206",
     title: "Peugeot 206",
     categories: ["audio", "personalizacion"],
-    summary: "Parlantes, subwoofer, multimedia y una etapa de ajuste con computadora y micrófono de medición.",
+    summary: "Instalación de parlantes, subwoofer y multimedia, con una etapa de ajuste mediante computadora y micrófono de medición. El recorrido muestra el montaje y las terminaciones del sistema.",
     steps: ["Parlantes en soportes junto al parabrisas.", "Subwoofer y terminaciones del baúl; pantalla y controlador en el habitáculo.", "Ajuste del sistema con computadora y micrófono de medición."],
     serviceRefs: ["audio", "personalizacion"],
     media: [
@@ -73,7 +73,7 @@ window.LuquisoundCases = [
     id: "chevrolet-corsa",
     title: "Chevrolet Corsa",
     categories: ["audio", "insonorizacion"],
-    summary: "Una intervención que muestra el tratamiento de la puerta, los componentes de audio y el interior terminado.",
+    summary: "Tratamiento de puertas y montaje de componentes de audio. El proceso recorre la colocación del material de insonorización, la integración del estéreo y el interior terminado.",
     steps: ["Preparación de la puerta con material de insonorización.", "Montaje de parlantes y equipos de audio.", "Integración del estéreo y recorrido por el resultado terminado."],
     serviceRefs: ["audio", "insonorizacion"],
     media: [
@@ -85,7 +85,7 @@ window.LuquisoundCases = [
     id: "mercedes-c63s",
     title: "Mercedes-Benz C63s",
     categories: ["personalizacion"],
-    summary: "Funciones multimedia e iluminación ambiental mostradas desde el interior del vehículo.",
+    summary: "Multimedia e iluminación ambiental integradas al habitáculo: pantalla con navegación y CarPlay, control de funciones y selección de colores de iluminación.",
     steps: ["Pantalla con navegación e interfaz CarPlay.", "Control de funciones desde la pantalla.", "Selección de colores de iluminación ambiental."],
     serviceRefs: ["personalizacion"],
     media: [
@@ -97,7 +97,7 @@ window.LuquisoundCases = [
     id: "abarth-dsp",
     title: "Abarth · Calibración DSP",
     categories: ["audio"],
-    summary: "El procedimiento de ajuste del sistema de audio con instrumental, computadora y micrófono de medición.",
+    summary: "Calibración del sistema de audio con instrumental, computadora y micrófono de medición. El recorrido muestra la disposición de los equipos y el software de ajuste.",
     steps: ["Controlador de audio en el habitáculo.", "Interfaz de medición y software de ajuste.", "Micrófono dispuesto para la medición dentro del vehículo."],
     serviceRefs: ["audio"],
     media: [
@@ -109,7 +109,7 @@ window.LuquisoundCases = [
     id: "abarth-admision",
     title: "Abarth · Admisión",
     categories: ["personalizacion"],
-    summary: "Un trabajo especial en el vano motor, con detalles del proceso manual y de las terminaciones de la admisión.",
+    summary: "Trabajo especial de admisión en el vano motor. El proceso muestra la intervención sobre las conexiones, los componentes y las terminaciones del montaje.",
     steps: ["Intervención manual sobre las conexiones en el vano motor.", "Detalles de los componentes de admisión.", "Vista del montaje terminado."],
     serviceRefs: [],
     media: [
@@ -121,7 +121,7 @@ window.LuquisoundCases = [
     id: "suv-gris",
     title: "SUV gris · Audio e iluminación",
     categories: ["audio", "personalizacion"],
-    summary: "Iluminación ambiental en tablero y puertas, junto con la instalación de un amplificador y un subwoofer.",
+    summary: "Instalación de iluminación ambiental en tablero y puertas, amplificador y subwoofer. El recorrido reúne los componentes y las terminaciones del interior.",
     steps: ["Iluminación ambiental en tablero y puertas.", "Amplificador y subwoofer en el vehículo.", "Recorrido por el interior y el exterior terminado."],
     serviceRefs: ["audio", "personalizacion"],
     media: [

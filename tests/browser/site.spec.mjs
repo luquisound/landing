@@ -98,10 +98,12 @@ test('consultation accepts year boundaries and optional ideas on keyboard resubm
   const vehicle = page.getByLabel('¿Qué auto tenés?');
   const year = page.getByLabel('Año', { exact: true });
   const idea = page.getByLabel('Contanos tu idea (opcional)', { exact: true });
+  await expect(page.getByLabel('¿Qué te interesa?')).toHaveValue('Asesoramiento');
+  await expect(page.locator('label[for="vehicle-year"]')).toBeVisible();
   await vehicle.fill('Chevrolet Corsa');
   await year.fill('1900');
   await expectWhatsApp(context, destinations, () => vehicle.press('Enter'),
-    'Hola Luquisound. Tengo un Chevrolet Corsa 1900.\n\nMe interesa: Audio.');
+    'Hola Luquisound. Tengo un Chevrolet Corsa 1900.\n\nMe interesa: Asesoramiento.');
 
   await vehicle.fill('Volkswagen Golf');
   await page.clock.setFixedTime(new Date('2032-06-01T12:00:00Z'));
@@ -115,58 +117,61 @@ test('consultation accepts year boundaries and optional ideas on keyboard resubm
   await expect(idea).toHaveValue('   ');
 });
 
-test('mobile contact keeps the consultation clear while scrolling and navigation reachable at the end', async ({ page }) => {
-  for (const height of [780, 480]) {
-    await page.setViewportSize({ width: 360, height });
+test('focused consultation controls stay below the header on short and enlarged-text screens', async ({ page }) => {
+  for (const [width, height, fontSize] of [[360, 480, 16], [812, 375, 32]]) {
+    await page.setViewportSize({ width, height });
     await page.goto('/contacto.html');
+    await page.evaluate(size => { document.documentElement.style.fontSize = `${size}px`; }, fontSize);
     await page.evaluate(() => document.fonts.ready);
-    let visibleChecks = 0;
-    for (const top of [0, 120, 240, 360, 480, 600]) {
-      await page.evaluate(top => window.scrollTo({ top, behavior: 'instant' }), top);
-      const accessibility = await page.evaluate(() => {
-        const button = document.getElementById('whatsapp-consultation');
-        const buttonRect = button.getBoundingClientRect();
-        const navRect = document.querySelector('.floating-nav').getBoundingClientRect();
-        const visible = buttonRect.top >= 0 && buttonRect.bottom <= innerHeight;
-        const overlap = buttonRect.left < navRect.right && buttonRect.right > navRect.left
-          && buttonRect.top < navRect.bottom && buttonRect.bottom > navRect.top;
-        return {
-          overlap,
-          visible,
-          receivesPointer: visible && button.contains(document.elementFromPoint(
-            buttonRect.left + buttonRect.width / 2, buttonRect.top + buttonRect.height / 2,
-          )),
-        };
-      });
-      expect(accessibility.overlap, `CTA overlap at 360x${height}, scroll ${top}`).toBe(false);
-      if (accessibility.visible) {
-        expect(accessibility.receivesPointer, `CTA pointer at 360x${height}, scroll ${top}`).toBe(true);
-        visibleChecks++;
-      }
+    for (const control of [page.getByLabel('¿Qué auto tenés?'), page.getByLabel('Año', { exact: true }),
+      page.getByRole('button', { name: 'Consultar por WhatsApp' })]) {
+      await control.focus();
+      await expect.poll(() => control.evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        const header = document.getElementById('site-header').getBoundingClientRect();
+        return rect.top >= header.bottom && rect.bottom <= innerHeight
+          && element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
+      }), { message: `Focused consultation control is obscured at ${width}x${height}, ${fontSize}px text` }).toBe(true);
     }
-    expect(visibleChecks).toBeGreaterThan(0);
-    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
-    const navigation = page.getByRole('navigation', { name: 'Navegación principal' });
-    await expect(navigation).toBeInViewport({ ratio: 1 });
-    await expect(navigation.getByRole('link')).toHaveText(['Inicio', 'Servicios', 'Trabajos', /Contacto/]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
 
-test('contact above the mobile breakpoint and other mobile pages retain floating navigation', async ({ page }) => {
-  for (const [route, width] of [
-    ['/contacto.html', 700], ['/contacto.html', 1280],
-    ['/servicios.html', 360], ['/trabajos.html', 360],
-  ]) {
+test('all pages share persistent top navigation and prototype sharing metadata', async ({ page }) => {
+  const routes = ['/', '/servicios.html', '/trabajos.html', '/contacto.html'];
+  for (const width of [360, 1280]) {
     await page.setViewportSize({ width, height: 780 });
-    await page.goto(route);
-    await page.evaluate(() => document.fonts.ready);
-    const navigation = page.getByRole('navigation', { name: 'Navegación principal' });
-    const before = await navigation.boundingBox();
-    await page.evaluate(() => window.scrollTo({ top: 220, behavior: 'instant' }));
-    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
-    const after = await navigation.boundingBox();
-    expect(after.y, `Navigation moved on ${route} at ${width}px`).toBeCloseTo(before.y, 1);
-    await expect(navigation).toBeInViewport({ ratio: 1 });
+    for (const route of routes) {
+      await page.goto(route);
+      const navigation = page.getByRole('navigation', { name: 'Navegación principal' });
+      const menu = page.locator('#menu-toggle');
+      const header = page.locator('#site-header');
+      if (width < 1000) {
+        await expect(navigation).toBeHidden();
+        await menu.click();
+        await expect(navigation).toBeVisible();
+        await expect(menu).toHaveAttribute('aria-expanded', 'true');
+      }
+      await expect(navigation.getByRole('link')).toHaveText(['Inicio', 'Servicios', 'Trabajos', 'Contacto']);
+      await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+      if (width < 1000) {
+        await page.keyboard.press('Escape');
+        await expect(navigation).toBeHidden();
+        await expect(menu).toBeFocused();
+        await expect(menu).toHaveAttribute('aria-expanded', 'false');
+      }
+      const before = await header.boundingBox();
+      await page.evaluate(() => window.scrollTo({ top: 220, behavior: 'instant' }));
+      const after = await header.boundingBox();
+      expect(after.y, `Header moved on ${route}`).toBeCloseTo(before.y, 1);
+      await expect(header).toBeInViewport({ ratio: 1 });
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+      const canonical = `https://luquisound.com${route}`;
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', canonical);
+      await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', canonical);
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /^https:\/\/luquisound\.com\/assets\//);
+      await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+    }
   }
 });
 
@@ -284,4 +289,171 @@ test('a failed service video offers retry and clears the error on recovery or ch
   await expect(dialog.locator('#service-dialog-image')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
+});
+
+test('the home features three real cases with working deep links and reduced-motion posters', async ({ page }) => {
+  const videoRequests = [];
+  page.on('request', request => { if (new URL(request.url()).pathname.endsWith('.mp4')) videoRequests.push(request.url()); });
+  await page.goto('/');
+  const video = page.locator('#hero-video');
+  await expect(video).not.toHaveAttribute('src');
+  await expect(video).toHaveJSProperty('paused', true);
+  await expect(video).toHaveJSProperty('controls', false);
+  await expect(video).toHaveJSProperty('loop', true);
+  const cases = [
+    ['ford-mustang-insonorizacion', 'Ford Mustang'],
+    ['bmw-335i', 'BMW 335i'],
+    ['mercedes-c63s', 'Mercedes-Benz C63s'],
+  ];
+  for (const [id, title] of cases) {
+    const link = page.locator(`#trabajos-destacados a[href="trabajos.html?trabajo=${id}"]`);
+    await expect(link).toHaveCount(1);
+    await link.click();
+    await expect(page.getByRole('dialog', { name: title, exact: true })).toBeVisible();
+    await page.goBack();
+    await expect(page.locator('#trabajos-destacados')).toBeVisible();
+  }
+  expect(videoRequests).toEqual([]);
+});
+
+test('home and portfolio reflow with enlarged text on narrow and landscape screens', async ({ page }) => {
+  for (const [width, height] of [[320, 568], [812, 375]]) {
+    await page.setViewportSize({ width, height });
+    for (const route of ['/', '/trabajos.html']) {
+      await page.goto(route);
+      await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; });
+      await page.evaluate(() => document.fonts.ready);
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        { message: `Horizontal overflow on ${route} at ${width}x${height} with enlarged text` }).toBe(true);
+      const target = route === '/' ? page.locator('#trabajos-destacados a').first() : page.locator('.project-card').first();
+      await target.focus();
+      await expect.poll(() => target.evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        const top = Math.max(rect.top, document.getElementById('site-header').getBoundingClientRect().bottom);
+        const bottom = Math.min(rect.bottom, innerHeight);
+        return bottom > top && element.contains(document.elementFromPoint(rect.left + rect.width / 2, (top + bottom) / 2));
+      })).toBe(true);
+    }
+  }
+});
+
+test.describe('home video with motion enabled', () => {
+  test.use({ reducedMotion: 'no-preference' });
+
+  test('loops without controls, pauses when covered or hidden and resumes on return', async ({ page }) => {
+    await page.goto('/');
+    const video = page.locator('#hero-video');
+    await expect(video).toHaveAttribute('src', /assets\/(?:hero-desktop|workshop-mobile)\.mp4$/);
+    await expect(video).toHaveJSProperty('loop', true);
+    await expect(video).toHaveJSProperty('controls', false);
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0);
+    await page.locator('#trabajos-destacados').scrollIntoViewIfNeeded();
+    await expect(video).toHaveJSProperty('paused', true);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await expect(video).toHaveJSProperty('paused', false);
+    const resumedAt = await video.evaluate(element => element.currentTime);
+    await expect.poll(() => video.evaluate(element => element.currentTime)).not.toBe(resumedAt);
+    // Simulate the document visibility event independently of headless window focus.
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await expect(video).toHaveJSProperty('paused', true);
+    await page.evaluate(() => {
+      delete document.hidden;
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await expect(video).toHaveJSProperty('paused', false);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(video).toHaveJSProperty('paused', true);
+    await expect(video).not.toHaveAttribute('src');
+  });
+
+  test('data-saving preference keeps the poster without requesting video', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'connection', { configurable: true,
+        value: { saveData: true, addEventListener() {} } });
+    });
+    const videoRequests = [];
+    page.on('request', request => { if (new URL(request.url()).pathname.endsWith('.mp4')) videoRequests.push(request.url()); });
+    await page.goto('/');
+    await expect(page.locator('#hero-video')).not.toHaveAttribute('src');
+    await expect(page.locator('#hero-video')).toHaveJSProperty('paused', true);
+    await expect(page.locator('.hero-poster')).toBeVisible();
+    expect(videoRequests).toEqual([]);
+  });
+});
+
+test('portfolio contains developed cases and retires standalone-photo links', async ({ page }) => {
+  await page.goto('/trabajos.html');
+  await expect(page.locator('.project-card')).toHaveCount(10);
+  await expect(page.locator('.project-card:not([data-case])')).toHaveCount(0);
+  await page.goto('/trabajos.html?categoria=audio&trabajo=foto-0');
+  await expect(page).toHaveURL(/\/trabajos\.html\?categoria=audio$/);
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.getByRole('button', { name: /^Audio/ })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('work dialogs preserve modified browser arrow shortcuts', async ({ page }) => {
+  await page.goto('/trabajos.html?trabajo=ford-mustang-insonorizacion');
+  const dialog = page.getByRole('dialog', { name: 'Ford Mustang', exact: true });
+  await expect(dialog).toBeVisible();
+  const location = page.url();
+  for (const modifier of ['altKey', 'ctrlKey', 'metaKey', 'shiftKey']) {
+    for (const key of ['ArrowLeft', 'ArrowRight']) {
+      const prevented = await dialog.evaluate((element, { modifier, key }) => {
+        const event = new KeyboardEvent('keydown', { key, [modifier]: true, bubbles: true, cancelable: true });
+        element.dispatchEvent(event);
+        return event.defaultPrevented;
+      }, { modifier, key });
+      expect(prevented, `${modifier}+${key} was intercepted`).toBe(false);
+      await expect(page).toHaveURL(location);
+      await expect(dialog).toBeVisible();
+    }
+  }
+});
+
+test('work video errors reset image messages and offer retry and media recovery', async ({ page }) => {
+  let failImage = true;
+  let failVideo = true;
+  await page.route('**/assets/case-bmw.jpg', route => failImage ? route.abort() : route.continue());
+  await page.route('**/assets/case-bmw.mp4', route => failVideo ? route.abort() : route.continue());
+  await page.goto('/trabajos.html?trabajo=bmw-335i');
+  const dialog = page.getByRole('dialog', { name: 'BMW 335i', exact: true });
+  const error = page.locator('#project-media-error');
+  const video = page.locator('#project-video');
+  const retry = page.locator('#project-video-retry');
+  const next = dialog.getByRole('button', { name: 'Foto o video siguiente', exact: true });
+  await expect(error).toBeVisible();
+  await expect(error).toContainText(/imagen/i);
+  await next.click();
+  await video.evaluate(element => element.play().catch(() => {}));
+  await expect(error).toBeVisible();
+  await expect(error).toContainText(/video/i);
+  await expect(error).not.toContainText(/imagen/i);
+  await expect(retry).toBeVisible();
+
+  failVideo = false;
+  await retry.click();
+  await expect(error).toBeHidden();
+  await expect(retry).toBeHidden();
+  await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2);
+  await expect(video).toHaveJSProperty('paused', false);
+  failImage = false;
+  await dialog.getByRole('button', { name: 'Foto o video anterior', exact: true }).click();
+  await expect(dialog.locator('#project-image')).toBeVisible();
+  await expect(error).toBeHidden();
+  await expect(retry).toBeHidden();
+  await expect(video).not.toHaveAttribute('src');
+  await expect(video).toHaveJSProperty('paused', true);
+
+  failVideo = true;
+  await next.click();
+  await video.evaluate(element => element.play().catch(() => {}));
+  await expect(retry).toBeVisible();
+  await dialog.getByRole('button', { name: 'Cerrar trabajo', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(error).toBeHidden();
+  await expect(retry).toBeHidden();
+  await expect(video).not.toHaveAttribute('src');
 });
