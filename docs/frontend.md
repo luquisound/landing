@@ -103,7 +103,8 @@ The idea is optional; empty ideas are omitted from the message. Submitting
 prepares a message locally and opens WhatsApp directly, preserving the form
 values for further edits. The visitor sends the message from the chat; there
 is no backend or automatic message delivery.
-Repository delivery does not deploy the website automatically.
+Pushes to `main` automatically deploy the website to Cloudflare after the
+`public-boundary` and `tests` CI jobs succeed.
 
 ## Production domain and delivery
 
