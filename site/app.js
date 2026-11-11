@@ -36,10 +36,8 @@ if (header && navigation && menuToggle) {
   document.addEventListener("click", (event) => {
     if (menuToggle.getAttribute("aria-expanded") === "true" && !header.contains(event.target)) setMenu(false);
   });
-  header.addEventListener("focusout", () => {
-    queueMicrotask(() => {
-      if (!header.contains(document.activeElement)) setMenu(false);
-    });
+  header.addEventListener("focusout", (event) => {
+    if (event.relatedTarget && !header.contains(event.relatedTarget)) setMenu(false);
   });
   desktopNavigation.addEventListener("change", () => setMenu(false));
   document.addEventListener("keydown", (event) => {
@@ -454,6 +452,13 @@ if (serviceDialog) {
 }
 
 if (consultationForm) {
+  const floatingWhatsApp = document.getElementById("floating-whatsapp");
+  if (floatingWhatsApp) {
+    const consultationAction = document.getElementById("whatsapp-consultation");
+    new IntersectionObserver(([entry]) => {
+      floatingWhatsApp.classList.toggle("is-redundant", entry.isIntersecting);
+    }).observe(consultationAction);
+  }
   const selectedInterest = new URLSearchParams(location.search).get("interes");
   const interestField = document.getElementById("interest");
   const vehicleField = document.getElementById("vehicle");
@@ -475,7 +480,10 @@ if (consultationForm) {
       const headerRect = header?.getBoundingClientRect();
       const headerVisible = headerRect && headerRect.bottom > viewportTop && headerRect.top < viewportBottom;
       const safeTop = headerVisible ? Math.max(viewportTop + 24, headerRect.bottom + 16) : viewportTop + 24;
-      const safeBottom = viewportBottom - 24;
+      const floatingRect = floatingWhatsApp?.getBoundingClientRect();
+      const floatingVisible = floatingRect && getComputedStyle(floatingWhatsApp).visibility !== "hidden"
+        && floatingRect.top < viewportBottom && floatingRect.bottom > viewportTop;
+      const safeBottom = floatingVisible ? Math.min(viewportBottom - 24, floatingRect.top - 16) : viewportBottom - 24;
       if (rect.top >= safeTop && rect.bottom <= safeBottom) return;
       const desiredTop = safeTop + Math.max(0, (safeBottom - safeTop - rect.height) / 2);
       window.scrollBy({ top: rect.top - desiredTop, behavior: reducedMotion.matches ? "auto" : "smooth" });

@@ -118,6 +118,10 @@ The idea is optional; empty ideas are omitted from the message. Submitting
 prepares a message locally and opens WhatsApp directly, preserving the form
 values for further edits. The visitor sends the message from the chat; there
 is no backend or automatic message delivery.
+Contact also has a floating direct WhatsApp link, available without JavaScript.
+It stays out of the way while a form control has focus or the form's submit
+button is visible. Bottom spacing and focus scrolling account for the floating
+link; opening it does not require or submit form fields.
 Pushes to `main` automatically deploy the website to Cloudflare after the
 `public-boundary` and `tests` CI jobs succeed.
 

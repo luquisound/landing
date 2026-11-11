@@ -137,6 +137,79 @@ test('focused consultation controls stay below the header on short and enlarged-
   }
 });
 
+test('mobile menu links navigate by pointer, touch and keyboard', async ({ page, isMobile }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const [name, route] of [['Servicios', '/servicios.html'], ['Trabajos', '/trabajos.html']]) {
+    await page.goto('/');
+    const menu = page.locator('#menu-toggle');
+    const link = page.getByRole('navigation').getByRole('link', { name, exact: true });
+    if (isMobile) {
+      await menu.tap();
+      await link.tap();
+    } else {
+      await menu.click();
+      await link.click();
+    }
+    await expect(page).toHaveURL(new RegExp(`${route}$`));
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(name);
+
+    await page.goto('/');
+    await menu.focus();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'Inicio', exact: true })).toBeFocused();
+    await page.keyboard.press('Tab');
+    if (name === 'Trabajos') await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(new RegExp(`${route}$`));
+  }
+  await page.goto('/contacto.html');
+  await page.locator('#menu-toggle').click();
+  await page.getByRole('navigation').getByRole('link', { name: 'Contacto', exact: true }).focus();
+  await page.keyboard.press('Tab');
+  await expect(page.getByLabel('¿Qué auto tenés?')).toBeFocused();
+  await expect(page.getByRole('navigation')).toBeHidden();
+});
+
+test('floating WhatsApp opens the direct chat and avoids form interaction', async ({ context, page }) => {
+  const destinations = await interceptWhatsApp(context);
+  for (const width of [360, 1280]) {
+    await page.setViewportSize({ width, height: 480 });
+    await page.goto('/contacto.html');
+    const floating = page.getByRole('link', { name: 'Abrir WhatsApp directamente' });
+    await expect(floating).toBeVisible();
+    await expect(floating).toBeInViewport({ ratio: 1 });
+    const bounds = await floating.boundingBox();
+    expect(bounds.width).toBeGreaterThanOrEqual(44);
+    expect(bounds.height).toBeGreaterThanOrEqual(44);
+    const count = destinations.length;
+    const popupPromise = context.waitForEvent('page');
+    await floating.click();
+    const popup = await popupPromise;
+    await expect.poll(() => destinations.length).toBe(count + 1);
+    expect(destinations.at(-1).href).toBe('https://wa.me/5491173581958');
+    await popup.close();
+
+    const vehicle = page.getByLabel('¿Qué auto tenés?');
+    await expect(vehicle).toHaveValue('');
+    await vehicle.focus();
+    await expect(floating).toBeHidden();
+    await vehicle.evaluate(element => element.blur());
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await expect(floating).toBeVisible();
+    await page.locator('h1').click();
+    const submit = page.getByRole('button', { name: 'Consultar por WhatsApp' });
+    await submit.scrollIntoViewIfNeeded();
+    await expect(floating).toBeHidden();
+    expect(await submit.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      return element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
+    })).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
 test('all pages share persistent top navigation and prototype sharing metadata', async ({ page }) => {
   const routes = ['/', '/servicios.html', '/trabajos.html', '/contacto.html'];
   for (const width of [360, 1280]) {
@@ -184,6 +257,7 @@ test.describe('contact without JavaScript', () => {
     await expect(page.getByLabel('¿Qué auto tenés?')).toBeDisabled();
     await expect(page.getByRole('link', { name: 'consultarnos directamente por WhatsApp' }))
       .toHaveAttribute('href', 'https://wa.me/5491173581958');
+    await expect(page.getByRole('link', { name: 'Abrir WhatsApp directamente' })).toBeVisible();
   });
 });
 
