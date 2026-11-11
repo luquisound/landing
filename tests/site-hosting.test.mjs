@@ -222,6 +222,31 @@ test('video ranges serve exact bounded, open-ended and suffix bytes', async () =
   }
 });
 
+test('complete video ranges preserve the asset stream and partial-response headers', async () => {
+  for (const declaredLength of [true, false]) {
+    for (const range of ['bytes=0-', 'bytes=0-9', 'bytes=0-99', 'bytes=-50']) {
+      const upstream = new Response('0123456789', { headers: {
+        'Content-Type': 'video/mp4', ETag: '"video-v1"',
+        ...(declaredLength ? { 'Content-Length': '10' } : {}),
+      } });
+      const body = upstream.body;
+      const response = await worker.fetch(new Request('https://luquisound.com/assets/video.mp4', {
+        headers: { Range: range, 'If-Range': '"video-v1"' },
+      }), {
+        VIDEO_LENGTHS: { '/assets/video.mp4': 10 },
+        ASSETS: { fetch() { return upstream; } },
+      });
+      assert.equal(response.status, 206, range);
+      assert.equal(response.headers.get('Content-Range'), 'bytes 0-9/10', range);
+      assert.equal(response.headers.get('Content-Length'), '10', range);
+      assert.equal(response.headers.get('Accept-Ranges'), 'bytes', range);
+      assert.equal(response.body, body, 'A complete range must reuse the asset stream.');
+      assert.equal(body.locked, false, 'A complete range must not acquire a JavaScript reader.');
+      assert.equal(await response.text(), '0123456789', range);
+    }
+  }
+});
+
 test('invalid and unsatisfiable single video ranges return an empty 416', async () => {
   for (const range of ['bytes=-', 'bytes=10-', 'bytes=4-2', 'bytes=-0', 'items=0-1', '',
     'bytes=9007199254740992-', 'bytes=0-9007199254740992', 'bytes=-9007199254740992']) {

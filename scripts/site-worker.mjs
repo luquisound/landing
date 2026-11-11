@@ -103,6 +103,8 @@ function videoResponse(request, response, videoLengths) {
   const selectedLength = selected.end - selected.start + 1;
   headers.set('Content-Range', `bytes ${selected.start}-${selected.end}/${size}`);
   headers.set('Content-Length', String(selectedLength));
+  // Full-file ranges can reuse the native asset stream without JavaScript reads.
+  if (selected.start === 0 && selectedLength === size) return new Response(response.body, { status: 206, headers });
   let body = sliceStream(response.body, selected.start, selectedLength);
   if (typeof FixedLengthStream === 'function') {
     const fixed = new FixedLengthStream(selectedLength);
