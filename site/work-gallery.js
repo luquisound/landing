@@ -192,9 +192,12 @@
       serviceLinks.append(link);
     });
     consultation.hidden = !project;
-    consultation.href = project?.serviceRefs.length === 1
-      ? `contacto.html?interes=${encodeURIComponent(categories[project.serviceRefs[0]])}`
-      : "contacto.html";
+    const contactUrl = new URL("contacto.html", window.location.href);
+    if (project) {
+      contactUrl.searchParams.set("trabajo", project.id);
+      if (project.serviceRefs.length === 1) contactUrl.searchParams.set("interes", categories[project.serviceRefs[0]]);
+    }
+    consultation.href = contactUrl.href;
     const media = project?.media || [{ type: "image", src: sourceImage.getAttribute("src"), alt: sourceImage.alt, title: title.textContent }];
     // Work-only additions precede the shared final photograph.
     const workMedia = project?.workOnlyMedia?.length

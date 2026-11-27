@@ -459,7 +459,10 @@ if (consultationForm) {
       floatingWhatsApp.classList.toggle("is-redundant", entry.isIntersecting);
     }).observe(consultationAction);
   }
-  const selectedInterest = new URLSearchParams(location.search).get("interes");
+  const contactParams = new URLSearchParams(location.search);
+  const selectedInterest = contactParams.get("interes");
+  const workId = contactParams.get("trabajo");
+  const viewedWork = window.LuquisoundCases?.find(work => work.id === workId);
   const interestField = document.getElementById("interest");
   const vehicleField = document.getElementById("vehicle");
   const yearField = document.getElementById("vehicle-year");
@@ -515,7 +518,9 @@ if (consultationForm) {
     const year = String(data.get("year")).trim();
     const interest = String(data.get("interest"));
     const idea = String(data.get("idea")).trim();
-    const message = `Hola Luquisound. Tengo un ${vehicle} ${year}.\n\nMe interesa: ${interest}.` + (idea ? `\n\nMi idea: ${idea}` : "");
+    const message = `Hola Luquisound. Tengo un ${vehicle} ${year}.\n\nMe interesa: ${interest}.`
+      + (viewedWork ? `\n\nVi en la web el trabajo «${viewedWork.title}».` : "")
+      + (idea ? `\n\nMi idea: ${idea}` : "");
     window.open(whatsappBaseUrl + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
   });
   document.getElementById("consultation-fields").disabled = false;

@@ -117,6 +117,32 @@ test('consultation accepts year boundaries and optional ideas on keyboard resubm
   await expect(idea).toHaveValue('   ');
 });
 
+test('work consultations identify the selected case in WhatsApp', async ({ context, page }) => {
+  const destinations = await interceptWhatsApp(context);
+  for (const [id, title, interest] of [
+    ['ford-mustang-insonorizacion', 'Ford Mustang', 'Insonorización'],
+    ['bmw-335i', 'BMW 335i', 'Asesoramiento'],
+    ['abarth-admision', 'Abarth · Admisión', 'Asesoramiento'],
+  ]) {
+    await page.goto('/trabajos.html?trabajo=' + id);
+    await page.locator('#project-consult').click();
+    await expect(page.locator('#interest')).toHaveValue(interest);
+    await page.locator('#vehicle').fill('Renault Clio');
+    await page.locator('#vehicle-year').fill('2015');
+    await expectWhatsApp(context, destinations, () => page.locator('#whatsapp-consultation').click(),
+      `Hola Luquisound. Tengo un Renault Clio 2015.\n\nMe interesa: ${interest}.\n\nVi en la web el trabajo «${title}».`);
+  }
+});
+
+test('a contact link with an unknown work ID keeps the standard consultation', async ({ context, page }) => {
+  const destinations = await interceptWhatsApp(context);
+  await page.goto('/contacto.html?trabajo=trabajo-inexistente');
+  await page.locator('#vehicle').fill('Renault Clio');
+  await page.locator('#vehicle-year').fill('2015');
+  await expectWhatsApp(context, destinations, () => page.locator('#whatsapp-consultation').click(),
+    'Hola Luquisound. Tengo un Renault Clio 2015.\n\nMe interesa: Asesoramiento.');
+});
+
 test('focused consultation controls stay below the header on short and enlarged-text screens', async ({ page }) => {
   for (const [width, height, fontSize] of [[360, 480, 16], [812, 375, 32]]) {
     await page.setViewportSize({ width, height });
