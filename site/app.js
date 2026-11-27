@@ -453,12 +453,6 @@ if (serviceDialog) {
 
 if (consultationForm) {
   const floatingWhatsApp = document.getElementById("floating-whatsapp");
-  if (floatingWhatsApp) {
-    const consultationAction = document.getElementById("whatsapp-consultation");
-    new IntersectionObserver(([entry]) => {
-      floatingWhatsApp.classList.toggle("is-redundant", entry.isIntersecting);
-    }).observe(consultationAction);
-  }
   const contactParams = new URLSearchParams(location.search);
   const selectedInterest = contactParams.get("interes");
   const workId = contactParams.get("trabajo");
@@ -484,8 +478,7 @@ if (consultationForm) {
       const headerVisible = headerRect && headerRect.bottom > viewportTop && headerRect.top < viewportBottom;
       const safeTop = headerVisible ? Math.max(viewportTop + 24, headerRect.bottom + 16) : viewportTop + 24;
       const floatingRect = floatingWhatsApp?.getBoundingClientRect();
-      const floatingVisible = floatingRect && getComputedStyle(floatingWhatsApp).visibility !== "hidden"
-        && floatingRect.top < viewportBottom && floatingRect.bottom > viewportTop;
+      const floatingVisible = floatingRect && floatingRect.top < viewportBottom && floatingRect.bottom > viewportTop;
       const safeBottom = floatingVisible ? Math.min(viewportBottom - 24, floatingRect.top - 16) : viewportBottom - 24;
       if (rect.top >= safeTop && rect.bottom <= safeBottom) return;
       const desiredTop = safeTop + Math.max(0, (safeBottom - safeTop - rect.height) / 2);

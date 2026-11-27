@@ -120,10 +120,9 @@ values for further edits. The visitor sends the message from the chat; there
 is no backend or automatic message delivery.
 When the visitor follows a case's consultation link, Contact uses its
 `trabajo` ID to include the published case title in the WhatsApp message.
-Contact also has a floating direct WhatsApp link, available without JavaScript.
-It stays out of the way while a form control has focus or the form's submit
-button is visible. Bottom spacing and focus scrolling account for the floating
-link; opening it does not require or submit form fields.
+Contact has a green floating WhatsApp link that opens the direct chat, including
+without JavaScript. It stays fixed while scrolling and editing the form.
+Bottom spacing and focus scrolling keep focused controls clear of the link.
 Pushes to `main` automatically deploy the website to Cloudflare after the
 `public-boundary` and `tests` CI jobs succeed.
 

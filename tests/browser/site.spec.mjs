@@ -198,7 +198,7 @@ test('mobile menu links navigate by pointer, touch and keyboard', async ({ page,
   await expect(page.getByRole('navigation')).toBeHidden();
 });
 
-test('floating WhatsApp opens the direct chat and avoids form interaction', async ({ context, page }) => {
+test('floating WhatsApp stays visible while editing and scrolling and opens the direct chat', async ({ context, page }) => {
   const destinations = await interceptWhatsApp(context);
   for (const width of [360, 1280]) {
     await page.setViewportSize({ width, height: 480 });
@@ -209,6 +209,24 @@ test('floating WhatsApp opens the direct chat and avoids form interaction', asyn
     const bounds = await floating.boundingBox();
     expect(bounds.width).toBeGreaterThanOrEqual(44);
     expect(bounds.height).toBeGreaterThanOrEqual(44);
+
+    const vehicle = page.getByLabel('¿Qué auto tenés?');
+    await vehicle.fill('Renault Clio');
+    await expect(floating).toBeVisible();
+    await vehicle.evaluate(element => element.blur());
+    const submit = page.getByRole('button', { name: 'Consultar por WhatsApp' });
+    await submit.evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await expect(submit).toBeInViewport({ ratio: 1 });
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await expect(floating).toBeVisible();
+    expect(await floating.boundingBox()).toEqual(bounds);
+    expect(await submit.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      return element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
+    })).toBe(true);
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    await expect(floating).toBeVisible();
+    expect(await floating.boundingBox()).toEqual(bounds);
     const count = destinations.length;
     const popupPromise = context.waitForEvent('page');
     await floating.click();
@@ -216,22 +234,7 @@ test('floating WhatsApp opens the direct chat and avoids form interaction', asyn
     await expect.poll(() => destinations.length).toBe(count + 1);
     expect(destinations.at(-1).href).toBe('https://wa.me/5491173581958');
     await popup.close();
-
-    const vehicle = page.getByLabel('¿Qué auto tenés?');
-    await expect(vehicle).toHaveValue('');
-    await vehicle.focus();
-    await expect(floating).toBeHidden();
-    await vehicle.evaluate(element => element.blur());
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-    await expect(floating).toBeVisible();
-    await page.locator('h1').click();
-    const submit = page.getByRole('button', { name: 'Consultar por WhatsApp' });
-    await submit.scrollIntoViewIfNeeded();
-    await expect(floating).toBeHidden();
-    expect(await submit.evaluate(element => {
-      const rect = element.getBoundingClientRect();
-      return element.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2));
-    })).toBe(true);
+    await expect(vehicle).toHaveValue('Renault Clio');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
